@@ -9,7 +9,6 @@
 body{background:#f7f5ff;min-height:100vh}
 .screen{display:none;min-height:100vh;padding:1.25rem 1rem 2rem;flex-direction:column;align-items:center}
 .screen.active{display:flex}
-.page-title{font-size:2rem;font-weight:800;letter-spacing:-1px;text-align:center;margin-bottom:0.2rem;line-height:1.2}
 .page-sub{color:#888780;font-size:0.9rem;text-align:center;margin-bottom:1.75rem}
 .card{background:#fff;border:1.5px solid #CECBF6;border-radius:16px;padding:1.25rem;width:100%;max-width:380px;margin-bottom:0.75rem}
 .btn{width:100%;max-width:380px;padding:0.9rem 1rem;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;transition:transform 0.1s;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -49,8 +48,7 @@ body{background:#f7f5ff;min-height:100vh}
 .timer-bubble.danger{border-color:#E24B4A;color:#E24B4A}
 .timer-mini{font-size:0.8rem;font-weight:700;color:#888780;margin-bottom:4px;text-align:right}
 .timer-mini.danger{color:#E24B4A}
-.seg-item{display:flex;align-items:center;gap:10px;padding:0.7rem 1rem;background:#fff;border:1.5px solid #EEEDFE;border-radius:10px;margin-bottom:0.5rem;cursor:pointer}
-.seg-item.selected{border-color:#7F77DD;background:#EEEDFE}
+.seg-item{display:flex;align-items:center;gap:10px;padding:0.7rem 1rem;background:#fff;border:1.5px solid #EEEDFE;border-radius:10px;margin-bottom:0.5rem}
 .reward-opt{background:#fff;border:1.5px solid #CECBF6;border-radius:14px;padding:1rem;margin-bottom:0.5rem}
 .reward-icon-big{font-size:2rem;margin-bottom:0.4rem}
 .reward-title{font-weight:700;color:#2C2C2A;margin-bottom:0.2rem}
@@ -79,28 +77,34 @@ textarea:focus{border-color:#7F77DD}
 @keyframes bangAnim{0%{transform:scale(0.5);opacity:0}60%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 .target-time{font-size:2.8rem;font-weight:800;color:#534AB7;text-align:center;font-family:monospace;margin:0.5rem 0}
+.hot-card-wrong{animation:hotWrong 0.6s ease}
+@keyframes hotWrong{0%{transform:scale(1);background:transparent}20%{transform:scale(1.15);background:#FCEBEB;color:#E24B4A;border-radius:12px}50%{transform:scale(1.1) rotate(-3deg);background:#FCEBEB;color:#E24B4A}70%{transform:scale(1.1) rotate(3deg)}100%{transform:scale(1);background:transparent;color:#2C2C2A}}
+.hot-wrong-overlay{position:fixed;inset:0;background:rgba(226,75,74,0.25);z-index:50;pointer-events:none;opacity:0;transition:opacity 0.1s}
+.hot-wrong-overlay.show{opacity:1}
+.current-player-banner{width:100%;max-width:380px;border-radius:14px;padding:0.85rem 1.2rem;display:flex;align-items:center;gap:12px;margin-bottom:0.5rem;border:2.5px solid transparent}
+.random-card{background:#fff;border:2px solid #CECBF6;border-radius:14px;padding:1.25rem;width:100%;max-width:380px;text-align:center;min-height:60px;display:flex;align-items:center;justify-content:center;margin-bottom:0.75rem}
+.random-card-text{font-size:1.1rem;font-weight:700;color:#2C2C2A;line-height:1.4}
+.add-field-row{display:flex;gap:8px;width:100%;max-width:380px;margin-top:0.25rem}
 </style>
 </head>
 <body>
 <div class="flash" id="flash"></div>
+<div class="hot-wrong-overlay" id="hotOverlay"></div>
 <div class="toast" id="toast"></div>
 
 <div class="screen active" id="s-setup">
-  <div id="mainTitle" class="page-title"></div>
+  <div id="mainTitle" style="margin-bottom:0.2rem"></div>
   <div class="page-sub">Trinkspiel ab 2 Spielern</div>
   <div class="label">Spieler hinzufügen</div>
-  <div class="pinput">
-    <input type="text" id="nameInp" placeholder="Name..." maxlength="14">
-    <button class="btn btn-primary" style="width:auto;padding:0.75rem 1.1rem" onclick="addPlayer()">+</button>
-  </div>
+  <div class="pinput"><input type="text" id="nameInp" placeholder="Name..." maxlength="14"><button class="btn btn-primary" style="width:auto;padding:0.75rem 1.1rem" onclick="addPlayer()">+</button></div>
   <div id="playerList" style="width:100%;max-width:380px"></div>
   <div style="height:0.75rem"></div>
-  <button class="btn btn-primary" id="startBtn" disabled onclick="startGame()">&#9654; Spiel starten</button>
+  <button class="btn btn-primary" id="startBtn" disabled onclick="startGame()">Spiel starten</button>
 </div>
 
 <div class="screen" id="s-chmenu">
   <div id="chTitle" style="margin-bottom:0.2rem"></div>
-  <div class="page-sub">5 Runden &middot; Sieger bef&uuml;llt ein Feld</div>
+  <div class="page-sub">5 Runden &middot; Sieger befüllt ein Feld</div>
   <div class="progress-row" id="progRow"></div>
   <div id="chInfo" style="width:100%;max-width:380px;text-align:center"></div>
   <div style="height:1rem"></div>
@@ -108,23 +112,24 @@ textarea:focus{border-color:#7F77DD}
 </div>
 
 <div class="screen" id="s-hot">
-  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zur&uuml;ck</button>
-  <div class="badge" style="background:#EEEDFE;color:#534AB7;margin-bottom:1rem">&#127183; H&ouml;her oder Tiefer</div>
-  <div id="hotPlayers" style="width:100%;max-width:380px;margin-bottom:0.75rem"></div>
-  <div class="card" style="text-align:center;padding:1.5rem">
+  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
+  <div class="badge" style="background:#EEEDFE;color:#534AB7;margin-bottom:0.75rem">Höher oder Tiefer</div>
+  <div id="hotPlayers" style="width:100%;max-width:380px;margin-bottom:0.5rem"></div>
+  <div class="card" style="text-align:center;padding:1.5rem" id="hotCardWrap">
     <div style="font-size:0.8rem;color:#888780;margin-bottom:0.25rem">Aktuelle Karte</div>
     <div class="big-val" id="hotCard">?</div>
     <div style="color:#888780;font-size:0.85rem;margin-top:0.5rem" id="hotStatus"></div>
   </div>
-  <div style="display:flex;gap:10px;width:100%;max-width:380px;margin-top:0.5rem">
-    <button class="btn btn-secondary" onclick="hotGuess('lower')">&darr; Tiefer</button>
-    <button class="btn btn-primary" onclick="hotGuess('higher')">&uarr; H&ouml;her</button>
+  <div style="display:flex;gap:8px;width:100%;max-width:380px;margin-top:0.5rem">
+    <button class="btn btn-secondary" style="flex:1;padding:0.75rem 0.5rem;font-size:0.9rem" onclick="hotGuess('lower')">&darr; Tiefer</button>
+    <button class="btn btn-secondary" style="flex:1;padding:0.75rem 0.5rem;font-size:0.9rem;border-color:#BA7517;color:#BA7517" onclick="hotGuess('equal')">=&nbsp;Gleich</button>
+    <button class="btn btn-primary" style="flex:1;padding:0.75rem 0.5rem;font-size:0.9rem" onclick="hotGuess('higher')">&uarr; Höher</button>
   </div>
 </div>
 
 <div class="screen" id="s-roulette">
-  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zur&uuml;ck</button>
-  <div class="badge" style="background:#FCEBEB;color:#791F1F;margin-bottom:0.75rem">&#127919; Russisch Roulette</div>
+  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
+  <div class="badge" style="background:#FCEBEB;color:#791F1F;margin-bottom:0.75rem">Russisch Roulette</div>
   <div id="rPlayers" style="width:100%;max-width:380px;margin-bottom:0.5rem"></div>
   <div class="gun-wrap" id="gunWrap">
     <svg id="gunSvg" width="240" height="120" viewBox="0 0 240 120" fill="none">
@@ -144,16 +149,13 @@ textarea:focus{border-color:#7F77DD}
   <div id="rMsg" style="min-height:2rem;margin:0.25rem 0"></div>
   <div class="roulette-status" id="rStatus"></div>
   <div style="height:0.5rem"></div>
-  <button class="btn btn-danger" id="shootBtn" onclick="shoot()">Abdr&uuml;cken</button>
+  <button class="btn btn-danger" id="shootBtn" onclick="shoot()">Abdrücken</button>
 </div>
 
 <div class="screen" id="s-ts">
-  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zur&uuml;ck</button>
-  <div class="badge" style="background:#E1F5EE;color:#085041;margin-bottom:1rem">&#9201; Time Stop</div>
-  <div style="text-align:center">
-    <div style="font-size:0.8rem;color:#888780">Zielzeit</div>
-    <div class="target-time" id="tsTarget">&ndash;</div>
-  </div>
+  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
+  <div class="badge" style="background:#E1F5EE;color:#085041;margin-bottom:1rem">Time Stop</div>
+  <div style="text-align:center"><div style="font-size:0.8rem;color:#888780">Zielzeit</div><div class="target-time" id="tsTarget">&ndash;</div></div>
   <div id="tsCurrent" style="font-size:1rem;font-weight:700;text-align:center;color:#2C2C2A;margin-bottom:0.5rem"></div>
   <div id="tsArea" style="width:100%;max-width:380px"></div>
   <div style="height:0.75rem"></div>
@@ -162,14 +164,14 @@ textarea:focus{border-color:#7F77DD}
 </div>
 
 <div class="screen" id="s-bid">
-  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zur&uuml;ck</button>
-  <div class="badge" style="background:#FAEEDA;color:#633806;margin-bottom:1rem">&#128176; Bieter-Duell</div>
+  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
+  <div class="badge" style="background:#FAEEDA;color:#633806;margin-bottom:1rem">Bieter-Duell</div>
   <div id="bidContent" style="width:100%;max-width:380px"></div>
 </div>
 
 <div class="screen" id="s-flu">
-  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zur&uuml;ck</button>
-  <div class="badge" style="background:#EEEDFE;color:#3C3489;margin-bottom:1rem">&#9986; Fli Fla Flu</div>
+  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
+  <div class="badge" style="background:#EEEDFE;color:#3C3489;margin-bottom:1rem">Fli Fla Flu</div>
   <div class="section-card">
     <div style="font-size:2rem;font-weight:800;letter-spacing:4px;color:#534AB7">Fli &middot; Fla &middot; Flu</div>
     <div style="color:#888780;margin-top:0.5rem;font-size:0.85rem">Alle spielen gleichzeitig. Wer verliert scheidet aus. Bei Gleichstand wiederholen.</div>
@@ -182,26 +184,31 @@ textarea:focus{border-color:#7F77DD}
 <div class="screen" id="s-winner">
   <div style="font-size:3.5rem;text-align:center;margin:0.5rem 0">&#127942;</div>
   <div id="winName" style="font-size:1.6rem;font-weight:800;text-align:center;margin-bottom:0.2rem"></div>
-  <div style="color:#888780;text-align:center;margin-bottom:1.5rem;font-size:0.9rem">darf ein Feld auf dem Rad bef&uuml;llen!</div>
+  <div style="color:#888780;text-align:center;margin-bottom:1rem;font-size:0.9rem">darf ein Feld auf dem Rad befüllen!</div>
   <div class="label">Aufgabe eintragen</div>
   <div style="width:100%;max-width:380px;position:relative">
     <div class="timer-mini" id="fieldTimerLabel">60s</div>
-    <textarea id="fieldTxt" placeholder="z.B. Trinke 3 Schlucke..." maxlength="80"></textarea>
+    <textarea id="fieldTxt" placeholder="z.B. Trinke 3 Schlücke..." maxlength="80"></textarea>
   </div>
   <div style="height:0.5rem"></div>
-  <button class="btn btn-primary" onclick="confirmField()">&#10003; Best&auml;tigen</button>
+  <div id="randomCardWrap" class="random-card" style="display:none"><div class="random-card-text" id="randomCardText"></div></div>
+  <div style="display:flex;gap:8px;width:100%;max-width:380px;margin-bottom:0.5rem">
+    <button class="btn btn-secondary" style="flex:1;font-size:0.9rem" onclick="randomizeField()">Zufällig</button>
+    <button class="btn btn-secondary" id="randomNextBtn" style="flex:1;font-size:0.9rem;display:none" onclick="randomizeField()">&rarr; Nächste</button>
+  </div>
+  <button class="btn btn-primary" onclick="confirmField()">Bestätigen</button>
 </div>
 
 <div class="screen" id="s-wheel">
   <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888780;margin-bottom:0.25rem">Das Rad</div>
-  <div class="wheel-wrap">
-    <div class="wheel-ptr"></div>
-    <canvas id="wCanvas" width="320" height="320"></canvas>
-  </div>
-  <div id="wheelResult" style="text-align:center;min-height:2.5rem;margin:0.4rem 0;font-size:0.95rem;font-weight:600;color:#534AB7"></div>
+  <div id="currentPlayerBanner" class="current-player-banner"></div>
+  <div class="wheel-wrap"><div class="wheel-ptr"></div><canvas id="wCanvas" width="320" height="320"></canvas></div>
+  <div id="wheelResult" style="text-align:center;min-height:2rem;margin:0.3rem 0;font-size:0.95rem;font-weight:600;color:#534AB7"></div>
   <button class="btn btn-primary" id="spinBtn" onclick="spinWheel()" style="max-width:280px">Drehen!</button>
-  <div style="height:0.4rem"></div>
-  <button class="btn btn-secondary" id="segsBtn" style="max-width:280px;font-size:0.85rem">Felder ansehen</button>
+  <div class="add-field-row">
+    <button class="btn btn-secondary" id="segsBtn" style="flex:1;font-size:0.82rem">Felder ansehen</button>
+    <button class="btn btn-secondary" style="flex:1;font-size:0.82rem" onclick="showAddFieldOverlay()">+ Feld hinzufügen</button>
+  </div>
 </div>
 
 <div class="screen" id="s-freefield">
@@ -210,18 +217,21 @@ textarea:focus{border-color:#7F77DD}
   <div style="color:#888780;text-align:center;margin-bottom:1.25rem;font-size:0.85rem">Schnell eine Aufgabe eintragen</div>
   <div class="timer-bubble" id="fftimer">60</div>
   <div style="height:0.75rem"></div>
-  <textarea id="ffTxt" placeholder="Was soll der n&auml;chste Spieler tun?" maxlength="80"></textarea>
+  <textarea id="ffTxt" placeholder="Was soll der nächste Spieler tun?" maxlength="80"></textarea>
   <div style="height:0.5rem"></div>
-  <button class="btn btn-primary" onclick="confirmFreeField()">&#10003; Best&auml;tigen</button>
+  <div id="ffRandomWrap" class="random-card" style="display:none"><div class="random-card-text" id="ffRandomText"></div></div>
+  <div style="display:flex;gap:8px;width:100%;max-width:380px;margin-bottom:0.5rem">
+    <button class="btn btn-secondary" style="flex:1;font-size:0.9rem" onclick="randomizeFF()">Zufällig</button>
+    <button class="btn btn-secondary" id="ffRandomNextBtn" style="flex:1;font-size:0.9rem;display:none" onclick="randomizeFF()">&rarr; Nächste</button>
+  </div>
+  <button class="btn btn-primary" onclick="confirmFreeField()">Bestätigen</button>
 </div>
 
 <div class="screen" id="s-task">
   <div style="font-size:3rem;text-align:center;margin-bottom:0.5rem">&#127919;</div>
   <div id="taskPlayer" style="font-size:1.3rem;font-weight:800;text-align:center;margin-bottom:0.2rem"></div>
   <div style="color:#888780;text-align:center;margin-bottom:1rem;font-size:0.85rem">ist dran:</div>
-  <div class="card" style="text-align:center">
-    <div id="taskTxt" style="font-size:1.2rem;font-weight:700;color:#2C2C2A;line-height:1.4"></div>
-  </div>
+  <div class="card" style="text-align:center"><div id="taskTxt" style="font-size:1.2rem;font-weight:700;color:#2C2C2A;line-height:1.4"></div></div>
   <div style="height:0.75rem"></div>
   <button class="btn btn-primary" onclick="taskDone()">&rarr; Weiter</button>
 </div>
@@ -233,22 +243,38 @@ textarea:focus{border-color:#7F77DD}
   <div id="rewardCard" style="width:100%;max-width:380px"></div>
   <div id="rewardSegSel" style="width:100%;max-width:380px;display:none"></div>
   <div style="height:0.5rem"></div>
-  <button class="btn btn-primary" id="rewardConfBtn" style="display:none" onclick="applyReward()">&#10003; Anwenden</button>
+  <button class="btn btn-primary" id="rewardConfBtn" style="display:none" onclick="applyReward()">Anwenden</button>
   <div style="height:0.4rem"></div>
   <button class="btn btn-secondary" onclick="afterReward()">Weiter &rarr;</button>
 </div>
 
 <div class="screen" id="s-segs">
-  <button class="back-btn" onclick="go('s-wheel');drawWheel()">&larr; Zur&uuml;ck</button>
+  <button class="back-btn" onclick="go('s-wheel');drawWheel()">&larr; Zurück</button>
   <div class="label">Alle Felder</div>
   <div id="segList" style="width:100%;max-width:380px"></div>
 </div>
 
+<div id="addFieldOverlay" style="display:none;position:fixed;inset:0;background:rgba(92,80,180,0.18);z-index:200;align-items:flex-end;justify-content:center">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:1.5rem 1rem 2rem;border-top:1.5px solid #CECBF6">
+    <div style="font-weight:800;font-size:1.1rem;color:#2C2C2A;margin-bottom:0.75rem;text-align:center">Neues Feld hinzufügen</div>
+    <textarea id="addFieldTxt" placeholder="Aufgabe eingeben..." maxlength="80" style="min-height:70px"></textarea>
+    <div style="display:flex;gap:8px;margin-top:0.75rem">
+      <button class="btn btn-secondary" style="flex:1" onclick="randomizeAddField()">Zufällig</button>
+      <button class="btn btn-secondary" id="addFieldNextBtn" style="flex:1;display:none" onclick="randomizeAddField()">&rarr; Nächste</button>
+    </div>
+    <div id="addFieldRandomWrap" class="random-card" style="display:none;margin-top:0.5rem"></div>
+    <div style="display:flex;gap:8px;margin-top:0.75rem">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeAddFieldOverlay()">Abbrechen</button>
+      <button class="btn btn-primary" style="flex:1" onclick="confirmAddField()">Hinzufügen</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const TITLE_COLORS=['#7F77DD','#E24B4A','#1D9E75','#BA7517','#D4537E','#378ADD','#D85A30','#534AB7','#0891B2','#7C3AED'];
-function coloredText(text){let c=0;return text.split('').map(ch=>ch===' '?'<span style="display:inline-block;width:0.35em"> </span>':`<span style="color:${TITLE_COLORS[c++%TITLE_COLORS.length]}">${ch}</span>`).join('');}
-document.getElementById('mainTitle').innerHTML=`<div style="font-size:2rem;font-weight:800;letter-spacing:-0.5px;line-height:1.2">${coloredText('Wheel of')}<br>${coloredText('Misfortune')}</div>`;
-document.getElementById('chTitle').innerHTML=`<div style="font-size:1.4rem;font-weight:800;letter-spacing:-0.5px">${coloredText('Challenge-Phase')}</div>`;
+function coloredText(t){let c=0;return t.split('').map(ch=>ch===' '?'<span style="display:inline-block;width:0.35em"> </span>':`<span style="color:${TITLE_COLORS[c++%TITLE_COLORS.length]}">${ch}</span>`).join('');}
+document.getElementById('mainTitle').innerHTML=`<div style="font-size:2rem;font-weight:800;letter-spacing:-0.5px;line-height:1.2;text-align:center">${coloredText('Wheel of')}<br>${coloredText('Misfortune')}</div>`;
+document.getElementById('chTitle').innerHTML=`<div style="font-size:1.4rem;font-weight:800;letter-spacing:-0.5px;text-align:center">${coloredText('Challenge-Phase')}</div>`;
 
 const PCOLORS=['#7F77DD','#E24B4A','#1D9E75','#BA7517','#D4537E','#378ADD','#D85A30','#534AB7'];
 const CHALLENGES=['hot','roulette','ts','bid','flu'];
@@ -261,24 +287,24 @@ const REWARDS=[
   {icon:'🔄',title:'Saboteur',desc:'Tausche zwei Felder miteinander',action:'swap'},
   {icon:'💣',title:'Zeitbombe',desc:'Nächstes Feld: doppelte Strafe!',action:'bomb'}
 ];
+const RANDOM_TASKS=['Trinke 3 Schlücke','Trinke 1 Shot','Wasserfall','Trinkbuddy für 3 Runden','Auf EX','Deine Nachbarn trinken','Imitiere ein Tier','Abstimmung wer trinkt',"Verschick' ein Selfie",'Trinke 2 Schlücke','Trinke 4 Schlücke','Trinke 5 Schlücke','Trinkspruch','Redewendung','Kompliment an alle','Trinke aus einem anderen Getränk'];
 
-let players=[],segments=[],chOrder=[],chIdx=0,spinPlayer=0;
+let players=[],segments=[],chOrder=[],chIdx=0,spinPlayer=0,firstSpinPlayer=0;
 let spinAngle=0,spinning=false,pendingSegIdx=-1;
 let rAlive=[],rPIdx=0,rBangPos=0,rShotCount=0;
 let hotAlive=[],hotPIdx=0,hotVal=0;
-let tsTarget=0,tsRunning=false,tsT0=0,tsTimes=[],tsPIdx=0;
+let tsTarget=0,tsRunning=false,tsT0=0,tsTimes=[],tsPIdx=0,tsCount=0,tsStartIdx=0;
 let bid={};
 let fluAlive=[];
-let ffInt=null,ffSec=60;
-let ftInt=null,ftSec=60;
+let ffInt=null,ffSec=60,ftInt=null,ftSec=60;
 let pendingBomb=false,rewardAction=null,rewardSeg=-1,swapFirst=-1;
-let winnerPIdx=-1;
+let winnerPIdx=-1,lastRandomIdx=-1;
 
 function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
 function toast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function doFlash(){const f=document.getElementById('flash');f.classList.add('show');setTimeout(()=>f.classList.remove('show'),400);}
 function rnd(n){return Math.floor(Math.random()*n);}
-function shuffleArr(a){for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+function shuffleArr(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=rnd(i+1);[b[i],b[j]]=[b[j],b[i]];}return b;}
 
 document.getElementById('nameInp').addEventListener('keydown',e=>{if(e.key==='Enter')addPlayer();});
 document.getElementById('segsBtn').addEventListener('click',()=>{
@@ -286,87 +312,61 @@ document.getElementById('segsBtn').addEventListener('click',()=>{
   go('s-segs');
 });
 
-function addPlayer(){
-  const inp=document.getElementById('nameInp');const name=inp.value.trim();
-  if(!name||players.length>=8)return;
-  if(players.find(p=>p.name===name)){toast('Name bereits vergeben');return;}
-  players.push({name,color:PCOLORS[players.length]});inp.value='';renderPList();
-  document.getElementById('startBtn').disabled=players.length<2;
-}
+function addPlayer(){const inp=document.getElementById('nameInp');const name=inp.value.trim();if(!name||players.length>=8)return;if(players.find(p=>p.name===name)){toast('Name bereits vergeben');return;}players.push({name,color:PCOLORS[players.length]});inp.value='';renderPList();document.getElementById('startBtn').disabled=players.length<2;}
 function removeP(i){players.splice(i,1);players.forEach((p,idx)=>p.color=PCOLORS[idx]);renderPList();document.getElementById('startBtn').disabled=players.length<2;}
-function renderPList(){
-  document.getElementById('playerList').innerHTML=players.map((p,i)=>`<div class="chip" style="background:${p.color}18;border:1.5px solid ${p.color}55"><div class="dot" style="background:${p.color}"></div><span style="flex:1;font-weight:700;color:#2C2C2A">${p.name}</span><button onclick="removeP(${i})" style="background:none;border:none;color:#888780;cursor:pointer;font-size:1.1rem">x</button></div>`).join('');
-}
-function startGame(){initSegs();chOrder=shuffleArr([...CHALLENGES]);chIdx=0;spinPlayer=0;showChMenu();}
-function initSegs(){
-  segments=[];
-  for(let i=0;i<9;i++){
-    if(i===4)segments.push({type:'reward',text:'Belohnungsfeld',size:1,owner:null,color:'#BA7517',hits:0});
-    else segments.push({type:'free',text:'',size:1,owner:null,color:'#D3D1C7',hits:0});
-  }
-}
+function renderPList(){document.getElementById('playerList').innerHTML=players.map((p,i)=>`<div class="chip" style="background:${p.color}18;border:1.5px solid ${p.color}55"><div class="dot" style="background:${p.color}"></div><span style="flex:1;font-weight:700;color:#2C2C2A">${p.name}</span><button onclick="removeP(${i})" style="background:none;border:none;color:#888780;cursor:pointer;font-size:1.1rem">x</button></div>`).join('');}
+
+function startGame(){initSegs();chOrder=shuffleArr([...CHALLENGES]);chIdx=0;firstSpinPlayer=rnd(players.length);spinPlayer=firstSpinPlayer;showChMenu();}
+function initSegs(){segments=[];for(let i=0;i<9;i++){if(i===4)segments.push({type:'reward',text:'Belohnungsfeld',size:1,owner:null,color:'#BA7517',hits:0});else segments.push({type:'free',text:'',size:1,owner:null,color:'#D3D1C7',hits:0});}}
+
 function showChMenu(){
-  if(chIdx>=5){go('s-wheel');drawWheel();return;}
+  if(chIdx>=5){go('s-wheel');drawWheel();updateCurrentPlayerBanner();return;}
   document.getElementById('progRow').innerHTML=Array.from({length:5},(_,i)=>`<div class="pdot ${i<chIdx?'done':i===chIdx?'active':''}"></div>`).join('');
-  const type=chOrder[chIdx];
-  const emoji={hot:'🃏',roulette:'🔫',ts:'⏱️',bid:'💰',flu:'✂️'}[type];
-  document.getElementById('chInfo').innerHTML=`<div style="font-size:3rem;margin-bottom:0.5rem">${emoji}</div><div style="font-size:1.4rem;font-weight:800;color:#2C2C2A;margin-bottom:0.3rem">${CHNAMES[type]}</div><div style="color:#888780;font-size:0.85rem">Runde ${chIdx+1} von 5</div>`;
+  const type=chOrder[chIdx];const emoji={hot:'🃏',roulette:'🔫',ts:'⏱️',bid:'💰',flu:'✂️'}[type];
+  const cs=players[chIdx%players.length];
+  document.getElementById('chInfo').innerHTML=`<div style="font-size:3rem;margin-bottom:0.5rem">${emoji}</div><div style="font-size:1.4rem;font-weight:800;color:#2C2C2A;margin-bottom:0.3rem">${CHNAMES[type]}</div><div style="color:#888780;font-size:0.85rem;margin-bottom:0.75rem">Runde ${chIdx+1} von 5</div><div style="display:inline-flex;align-items:center;gap:8px;background:${cs.color}18;border:1.5px solid ${cs.color}55;border-radius:10px;padding:0.5rem 1rem"><div class="dot" style="background:${cs.color}"></div><span style="font-weight:700;color:#2C2C2A">${cs.name} beginnt</span></div>`;
   go('s-chmenu');
 }
-function launchChallenge(){const t=chOrder[chIdx];if(t==='hot')initHot();else if(t==='roulette')initRoulette();else if(t==='ts')initTs();else if(t==='bid')initBid();else initFlu();}
+function launchChallenge(){const t=chOrder[chIdx];const si=chIdx%players.length;if(t==='hot')initHot(si);else if(t==='roulette')initRoulette(si);else if(t==='ts')initTs(si);else if(t==='bid')initBid();else initFlu();}
 
-function initHot(){hotAlive=players.map((_,i)=>i);hotPIdx=0;hotVal=rnd(11);document.getElementById('hotCard').textContent=hotVal;renderHotP();document.getElementById('hotStatus').textContent=players[hotAlive[hotPIdx]].name+' ist dran';go('s-hot');}
+function initHot(si){hotAlive=players.map((_,i)=>i);while(hotAlive[0]!==si)hotAlive.push(hotAlive.shift());hotPIdx=0;hotVal=rnd(11);document.getElementById('hotCard').textContent=hotVal;renderHotP();document.getElementById('hotStatus').textContent=players[hotAlive[hotPIdx]].name+' ist dran';go('s-hot');}
 function renderHotP(){document.getElementById('hotPlayers').innerHTML=hotAlive.map(i=>`<div class="chip" style="background:${players[i].color}18;border:1.5px solid ${i===hotAlive[hotPIdx]?players[i].color:players[i].color+'44'}"><div class="dot" style="background:${players[i].color}"></div><span style="font-weight:700;color:#2C2C2A">${players[i].name}</span></div>`).join('');}
 function hotGuess(dir){
-  const nv=rnd(11);const ok=(dir==='higher'&&nv>hotVal)||(dir==='lower'&&nv<hotVal);
+  const nv=rnd(11);const prev=hotVal;let ok=dir==='higher'?nv>hotVal:dir==='lower'?nv<hotVal:nv===hotVal;
   hotVal=nv;document.getElementById('hotCard').textContent=nv;
-  if(!ok){const nm=players[hotAlive[hotPIdx]].name;hotAlive.splice(hotPIdx,1);toast(nv+' – falsch! '+nm+' ausgeschieden.');}
-  else{toast(nv+' – richtig!');hotPIdx=(hotPIdx+1)%hotAlive.length;}
-  if(hotAlive.length===1){setTimeout(()=>challengeWon(hotAlive[0]),700);return;}
-  if(hotAlive.length===0){toast('Unentschieden!');initHot();return;}
-  hotPIdx=hotPIdx%hotAlive.length;renderHotP();
-  document.getElementById('hotStatus').textContent=players[hotAlive[hotPIdx]].name+' ist dran';
+  if(!ok){const wrap=document.getElementById('hotCardWrap');wrap.classList.remove('hot-card-wrong');void wrap.offsetWidth;wrap.classList.add('hot-card-wrong');const ov=document.getElementById('hotOverlay');ov.classList.add('show');setTimeout(()=>ov.classList.remove('show'),400);const nm=players[hotAlive[hotPIdx]].name;hotAlive.splice(hotPIdx,1);toast(nv+' (war '+prev+') – falsch! '+nm+' trinkt!',3000);}
+  else{toast(dir==='equal'?nv+' – GLEICH! Perfekt!':nv+' – richtig!');hotPIdx=(hotPIdx+1)%hotAlive.length;}
+  if(hotAlive.length===1){setTimeout(()=>challengeWon(hotAlive[0]),800);return;}
+  if(hotAlive.length===0){toast('Unentschieden!');initHot(chIdx%players.length);return;}
+  hotPIdx=hotPIdx%hotAlive.length;renderHotP();document.getElementById('hotStatus').textContent=players[hotAlive[hotPIdx]].name+' ist dran';
 }
 
-function initRoulette(){rAlive=players.map((_,i)=>i);rPIdx=0;newRouletteRound();go('s-roulette');}
+function initRoulette(si){rAlive=players.map((_,i)=>i);while(rAlive[0]!==si)rAlive.push(rAlive.shift());rPIdx=0;newRouletteRound();go('s-roulette');}
 function newRouletteRound(){rBangPos=rnd(6);rShotCount=0;renderBullets();renderRP();document.getElementById('rMsg').innerHTML='';document.getElementById('rStatus').textContent=players[rAlive[rPIdx]].name+' ist dran';document.getElementById('shootBtn').disabled=false;document.getElementById('gunWrap').classList.remove('recoil');}
 function renderBullets(){document.getElementById('bulletTrack').innerHTML=Array.from({length:6},(_,i)=>{if(i>=rShotCount)return`<div class="bullet">${i+1}</div>`;const bang=(i===rBangPos);return`<div class="bullet ${bang?'fired-bang':'fired-safe'}">${bang?'X':'V'}</div>`;}).join('');}
 function spawnSmoke(){const wrap=document.getElementById('gunWrap');for(let i=0;i<6;i++){const p=document.createElement('div');p.className='smoke-particle';const sz=8+Math.random()*14,ang=Math.random()*Math.PI*2,dist=20+Math.random()*40;p.style.cssText=`width:${sz}px;height:${sz}px;top:30px;left:220px;--sx:${Math.cos(ang)*dist}px;--sy:${Math.sin(ang)*dist-20}px;animation-delay:${i*0.05}s`;wrap.appendChild(p);setTimeout(()=>p.remove(),900);}}
 function shoot(){
-  if(rShotCount>=6)return;
-  document.getElementById('shootBtn').disabled=true;
-  const isBang=(rShotCount===rBangPos);
-  document.getElementById('gunWrap').classList.add('recoil');
-  setTimeout(()=>document.getElementById('gunWrap').classList.remove('recoil'),250);
-  spawnSmoke();rShotCount++;renderBullets();
-  if(isBang){doFlash();const out=rAlive[rPIdx];document.getElementById('rMsg').innerHTML='<div class="bang-msg">BANG! 💥</div>';document.getElementById('rStatus').textContent=players[out].name+' trinkt!';toast(players[out].name+' ist raus!',3000);rAlive.splice(rPIdx,1);if(rAlive.length===1){setTimeout(()=>challengeWon(rAlive[0]),1800);}else if(rAlive.length===0){setTimeout(()=>initRoulette(),1800);}else{rPIdx=rPIdx%rAlive.length;setTimeout(()=>newRouletteRound(),2200);}}
+  if(rShotCount>=6)return;document.getElementById('shootBtn').disabled=true;const isBang=(rShotCount===rBangPos);document.getElementById('gunWrap').classList.add('recoil');setTimeout(()=>document.getElementById('gunWrap').classList.remove('recoil'),250);spawnSmoke();rShotCount++;renderBullets();
+  if(isBang){doFlash();const out=rAlive[rPIdx];document.getElementById('rMsg').innerHTML='<div class="bang-msg">BANG! 💥</div>';document.getElementById('rStatus').textContent=players[out].name+' trinkt!';toast(players[out].name+' ist raus!',3000);rAlive.splice(rPIdx,1);if(rAlive.length===1){setTimeout(()=>challengeWon(rAlive[0]),1800);}else if(rAlive.length===0){setTimeout(()=>initRoulette(chIdx%players.length),1800);}else{rPIdx=rPIdx%rAlive.length;setTimeout(()=>newRouletteRound(),2200);}}
   else{document.getElementById('rMsg').innerHTML='<div class="safe-msg">Klick... sicher!</div>';if(rShotCount>=6){rPIdx=(rPIdx+1)%rAlive.length;document.getElementById('rStatus').textContent='Niemand getroffen – neue Runde!';setTimeout(()=>newRouletteRound(),1500);}else{rPIdx=(rPIdx+1)%rAlive.length;setTimeout(()=>{document.getElementById('rMsg').innerHTML='';renderRP();document.getElementById('rStatus').textContent=players[rAlive[rPIdx]].name+' ist dran';document.getElementById('shootBtn').disabled=false;},900);}}
 }
 function renderRP(){document.getElementById('rPlayers').innerHTML=rAlive.map(i=>`<div class="chip" style="background:${players[i].color}18;border:1.5px solid ${i===rAlive[rPIdx]?players[i].color:players[i].color+'44'}"><div class="dot" style="background:${players[i].color}"></div><span style="font-weight:700;color:#2C2C2A">${players[i].name}</span></div>`).join('');}
 
-function initTs(){tsTarget=+(Math.random()*7+2).toFixed(2);tsTimes=[];tsPIdx=0;tsRunning=false;document.getElementById('tsTarget').textContent=tsTarget.toFixed(2)+'s';document.getElementById('tsBtn').textContent='START';document.getElementById('tsBtn').onclick=tsAction;document.getElementById('tsResults').innerHTML='';renderTsArea();updateTsP();go('s-ts');}
+function initTs(si){tsTarget=+(Math.random()*7+2).toFixed(2);tsTimes=[];tsCount=0;tsStartIdx=si;tsPIdx=si;tsRunning=false;document.getElementById('tsTarget').textContent=tsTarget.toFixed(2)+'s';document.getElementById('tsBtn').textContent='START';document.getElementById('tsBtn').onclick=tsAction;document.getElementById('tsResults').innerHTML='';renderTsArea();updateTsP();go('s-ts');}
 function renderTsArea(){document.getElementById('tsArea').innerHTML=`<div class="ts-cover"><div style="font-size:0.85rem;color:#888780;margin-bottom:0.5rem">Deine Zeit wird verdeckt</div><div style="font-size:2.5rem">🙈</div></div>`;}
-function updateTsP(){if(tsPIdx<players.length)document.getElementById('tsCurrent').textContent=players[tsPIdx].name+' ist dran';}
+function updateTsP(){const p=players[tsPIdx%players.length];document.getElementById('tsCurrent').innerHTML=`<div style="display:inline-flex;align-items:center;gap:8px;background:${p.color}18;border:1.5px solid ${p.color}55;border-radius:10px;padding:0.4rem 1rem"><div class="dot" style="background:${p.color}"></div><span>${p.name} ist dran</span></div>`;}
 function tsAction(){
   const btn=document.getElementById('tsBtn');
   if(!tsRunning){tsRunning=true;tsT0=Date.now();btn.textContent='STOPP';document.getElementById('tsArea').innerHTML=`<div class="ts-cover"><div style="font-size:1rem;font-weight:700;color:#534AB7">Läuft...</div><div style="font-size:2.5rem;margin-top:0.25rem">⏱️</div></div>`;}
-  else{tsRunning=false;const el=(Date.now()-tsT0)/1000;tsTimes.push({p:tsPIdx,t:el,d:Math.abs(el-tsTarget)});btn.textContent='START';tsPIdx++;document.getElementById('tsArea').innerHTML=`<div class="ts-cover"><div style="font-size:1rem;font-weight:700;color:#1D9E75">Gestoppt!</div><div style="font-size:2.5rem;margin-top:0.25rem">✅</div></div>`;if(tsPIdx>=players.length)setTimeout(()=>showTsResults(),600);else setTimeout(()=>{renderTsArea();updateTsP();},800);}
+  else{tsRunning=false;const el=(Date.now()-tsT0)/1000;tsTimes.push({p:tsPIdx%players.length,t:el,d:Math.abs(el-tsTarget)});btn.textContent='START';tsCount++;document.getElementById('tsArea').innerHTML=`<div class="ts-cover"><div style="font-size:1rem;font-weight:700;color:#1D9E75">Gestoppt!</div><div style="font-size:2.5rem;margin-top:0.25rem">✅</div></div>`;if(tsCount>=players.length){setTimeout(()=>showTsResults(),600);}else{tsPIdx=(tsPIdx+1)%players.length;setTimeout(()=>{renderTsArea();updateTsP();},800);}}
 }
-function showTsResults(){
-  tsTimes.sort((a,b)=>a.d-b.d);const w=tsTimes[0].p;
-  document.getElementById('tsCurrent').textContent='Ergebnis';document.getElementById('tsArea').innerHTML='';
-  document.getElementById('tsResults').innerHTML=tsTimes.map((r,i)=>{const p=players[r.p];const dc=r.d<0.3?'diff-great':r.d<1?'diff-ok':'diff-bad';return`<div class="result-row"><div style="display:flex;align-items:center"><div class="dot" style="background:${p.color};margin-right:8px"></div><span style="font-weight:700;color:#2C2C2A">${p.name}</span>${i===0?'<span class="winner-pill">Sieger</span>':''}</div><div style="display:flex;align-items:center;gap:6px"><span style="font-family:monospace;font-weight:700;color:#2C2C2A">${r.t.toFixed(2)}s</span><span class="${dc}">+-${r.d.toFixed(2)}s</span></div></div>`;}).join('');
-  const btn=document.getElementById('tsBtn');btn.textContent='Weiter';btn.onclick=()=>challengeWon(w);
-}
+function showTsResults(){tsTimes.sort((a,b)=>a.d-b.d);const w=tsTimes[0].p;document.getElementById('tsCurrent').textContent='Ergebnis';document.getElementById('tsArea').innerHTML='';document.getElementById('tsResults').innerHTML=tsTimes.map((r,i)=>{const p=players[r.p];const dc=r.d<0.3?'diff-great':r.d<1?'diff-ok':'diff-bad';return`<div class="result-row"><div style="display:flex;align-items:center"><div class="dot" style="background:${p.color};margin-right:8px"></div><span style="font-weight:700;color:#2C2C2A">${p.name}</span>${i===0?'<span class="winner-pill">Sieger</span>':''}</div><div style="display:flex;align-items:center;gap:6px"><span style="font-family:monospace;font-weight:700;color:#2C2C2A">${r.t.toFixed(2)}s</span><span class="${dc}">+-${r.d.toFixed(2)}s</span></div></div>`;}).join('');const btn=document.getElementById('tsBtn');btn.textContent='Weiter';btn.onclick=()=>challengeWon(w);}
 
-function initBid(){bid={ps:players.map((_,i)=>({idx:i,status:'active',highest:null})),cur:'',turnPos:0};renderBid();go('s-bid');}
+function initBid(){bid={ps:players.map((_,i)=>({idx:i,status:'active',highest:null})),cur:'',turnPos:chIdx%players.length};renderBid();go('s-bid');}
 function bidActives(){return bid.ps.filter(p=>p.status==='active');}
 function bidCurrent(){const a=bidActives();return a[bid.turnPos%a.length];}
 function bidGlobalMax(){const bids=bid.ps.filter(p=>p.highest!==null).map(p=>p.highest);return bids.length>0?Math.max(...bids):0;}
-function renderBid(){
-  const current=bidCurrent();const el=document.getElementById('bidContent');
-  el.innerHTML=`<div style="margin-bottom:0.75rem">${bid.ps.map(p=>{const isCurrent=(p===current&&p.status==='active');const isFolded=(p.status==='folded');const hasBid=(p.highest!==null);let bg,border,nameColor,statusEl;if(isFolded){bg='#F1EFE8';border='#D3D1C7';nameColor='#B4B2A9';statusEl='<span style="font-size:0.8rem;color:#B4B2A9">Ausgestiegen</span>';}else if(isCurrent){bg=players[p.idx].color+'22';border=players[p.idx].color;nameColor='#2C2C2A';statusEl=`<span style="font-size:0.8rem;font-weight:700;color:${players[p.idx].color}">Am Zug</span>`;}else if(hasBid){bg=players[p.idx].color+'11';border=players[p.idx].color+'44';nameColor='#2C2C2A';statusEl='<span style="font-size:0.8rem;color:#888780">Geboten</span>';}else{bg='#fff';border='#EEEDFE';nameColor='#888780';statusEl='<span style="font-size:0.8rem;color:#888780">Wartet</span>';}return`<div class="bid-player-row" style="background:${bg};border-color:${border}"><div style="display:flex;align-items:center;gap:8px"><div class="dot" style="background:${isFolded?'#D3D1C7':players[p.idx].color}"></div><span style="font-weight:700;color:${nameColor}">${players[p.idx].name}</span></div>${statusEl}</div>`;}).join('')}</div><div style="text-align:center;font-size:0.85rem;color:#888780;margin-bottom:0.25rem">Gebot nicht sichtbar – biete oder steige aus</div><div class="bid-display" id="bidDisp">${bid.cur||'–'}</div><div class="num-pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="num-btn" onclick="bNum(${n})">${n}</button>`).join('')}<button class="num-btn" onclick="bNum(0)" style="grid-column:2">0</button></div><div style="display:flex;gap:8px;margin-top:1rem"><button class="btn btn-danger" style="flex:1" onclick="bFold()">Aussteigen</button><button class="btn btn-primary" style="flex:1" onclick="bConfirm()">Bieten</button></div>`;
-}
+function renderBid(){const current=bidCurrent();const el=document.getElementById('bidContent');el.innerHTML=`<div style="margin-bottom:0.75rem">${bid.ps.map(p=>{const isCurrent=(p===current&&p.status==='active');const isFolded=(p.status==='folded');const hasBid=(p.highest!==null);let bg,border,nameColor,statusEl;if(isFolded){bg='#F1EFE8';border='#D3D1C7';nameColor='#B4B2A9';statusEl='<span style="font-size:0.8rem;color:#B4B2A9">Ausgestiegen</span>';}else if(isCurrent){bg=players[p.idx].color+'22';border=players[p.idx].color;nameColor='#2C2C2A';statusEl=`<span style="font-size:0.8rem;font-weight:700;color:${players[p.idx].color}">Am Zug</span>`;}else if(hasBid){bg=players[p.idx].color+'11';border=players[p.idx].color+'44';nameColor='#2C2C2A';statusEl='<span style="font-size:0.8rem;color:#888780">Geboten</span>';}else{bg='#fff';border='#EEEDFE';nameColor='#888780';statusEl='<span style="font-size:0.8rem;color:#888780">Wartet</span>';}return`<div class="bid-player-row" style="background:${bg};border-color:${border}"><div style="display:flex;align-items:center;gap:8px"><div class="dot" style="background:${isFolded?'#D3D1C7':players[p.idx].color}"></div><span style="font-weight:700;color:${nameColor}">${players[p.idx].name}</span></div>${statusEl}</div>`;}).join('')}</div><div style="text-align:center;font-size:0.85rem;color:#888780;margin-bottom:0.25rem">Gebot nicht sichtbar – biete oder steige aus</div><div class="bid-display" id="bidDisp">${bid.cur||'–'}</div><div class="num-pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="num-btn" onclick="bNum(${n})">${n}</button>`).join('')}<button class="num-btn" onclick="bNum(0)" style="grid-column:2">0</button></div><div style="display:flex;gap:8px;margin-top:1rem"><button class="btn btn-danger" style="flex:1" onclick="bFold()">Aussteigen</button><button class="btn btn-primary" style="flex:1" onclick="bConfirm()">Bieten</button></div>`;}
 function bNum(n){if(bid.cur.length<2)bid.cur+=n;const d=document.getElementById('bidDisp');if(d)d.textContent=bid.cur||'–';}
 function bReject(){const d=document.getElementById('bidDisp');if(!d)return;d.classList.remove('reject');void d.offsetWidth;d.classList.add('reject');bid.cur='';setTimeout(()=>{const d2=document.getElementById('bidDisp');if(d2)d2.textContent='–';},100);}
 function bConfirm(){const v=parseInt(bid.cur||'0');if(!v||v<=0){bReject();return;}const gm=bidGlobalMax();const cur=bidCurrent();if(v<=gm||v<=(cur.highest||0)){bReject();return;}cur.highest=v;bid.cur='';bid.turnPos++;const actives=bidActives();if(actives.length===1){setTimeout(()=>challengeWon(actives[0].idx),300);return;}bid.turnPos=bid.turnPos%actives.length;renderBid();}
@@ -377,96 +377,52 @@ function renderFluBtns(){document.getElementById('fluPlayerBtns').innerHTML=fluA
 function fluEliminate(i){fluAlive=fluAlive.filter(x=>x!==i);if(fluAlive.length===1){challengeWon(fluAlive[0]);return;}if(fluAlive.length===0){toast('Unentschieden!');initFlu();return;}renderFluBtns();}
 function fluMarkWinner(i){challengeWon(i);}
 
+function getRandomTask(){let idx;do{idx=rnd(RANDOM_TASKS.length);}while(idx===lastRandomIdx&&RANDOM_TASKS.length>1);lastRandomIdx=idx;return RANDOM_TASKS[idx];}
+function randomizeField(){const task=getRandomTask();document.getElementById('fieldTxt').value=task;document.getElementById('randomCardText').textContent=task;document.getElementById('randomCardWrap').style.display='flex';document.getElementById('randomNextBtn').style.display='flex';}
+function randomizeFF(){const task=getRandomTask();document.getElementById('ffTxt').value=task;document.getElementById('ffRandomText').textContent=task;document.getElementById('ffRandomWrap').style.display='flex';document.getElementById('ffRandomNextBtn').style.display='flex';}
+function randomizeAddField(){const task=getRandomTask();document.getElementById('addFieldTxt').value=task;document.getElementById('addFieldRandomWrap').style.display='flex';document.getElementById('addFieldRandomWrap').innerHTML=`<div class="random-card-text">${task}</div>`;document.getElementById('addFieldNextBtn').style.display='flex';}
+
 function challengeWon(pIdx){
-  winnerPIdx=pIdx;const p=players[pIdx];
-  document.getElementById('winName').textContent=p.name;document.getElementById('winName').style.color=p.color;
-  document.getElementById('fieldTxt').value='';ftSec=60;const lbl=document.getElementById('fieldTimerLabel');lbl.textContent='60s';lbl.className='timer-mini';
+  winnerPIdx=pIdx;const p=players[pIdx];document.getElementById('winName').textContent=p.name;document.getElementById('winName').style.color=p.color;
+  document.getElementById('fieldTxt').value='';document.getElementById('randomCardWrap').style.display='none';document.getElementById('randomNextBtn').style.display='none';
+  ftSec=60;const lbl=document.getElementById('fieldTimerLabel');lbl.textContent='60s';lbl.className='timer-mini';
   if(ftInt)clearInterval(ftInt);
   ftInt=setInterval(()=>{ftSec--;lbl.textContent=ftSec+'s';if(ftSec<=10)lbl.className='timer-mini danger';if(ftSec<=0){clearInterval(ftInt);penaltyField();}},1000);
   go('s-winner');
 }
 function penaltyField(){toast(players[winnerPIdx].name+' hat nicht eingetragen!',3000);chIdx++;showChMenu();}
-function confirmField(){
-  const t=document.getElementById('fieldTxt').value.trim();if(!t){toast('Bitte etwas eintragen!');return;}
-  if(ftInt)clearInterval(ftInt);
-  const fi=segments.findIndex(s=>s.type==='free'&&s.text==='');
-  if(fi>=0)segments[fi]={type:'player',text:t,size:1,owner:winnerPIdx,color:players[winnerPIdx].color,hits:0};
-  chIdx++;if(chIdx>=5){go('s-wheel');drawWheel();}else showChMenu();
-}
+function confirmField(){const t=document.getElementById('fieldTxt').value.trim();if(!t){toast('Bitte etwas eintragen!');return;}if(ftInt)clearInterval(ftInt);const fi=segments.findIndex(s=>s.type==='free'&&s.text==='');if(fi>=0)segments[fi]={type:'player',text:t,size:1,owner:winnerPIdx,color:players[winnerPIdx].color,hits:0};chIdx++;if(chIdx>=5){go('s-wheel');drawWheel();updateCurrentPlayerBanner();}else showChMenu();}
 
-function calcHitIdx(){
-  const TAU=Math.PI*2;
-  const total=segments.reduce((s,g)=>s+g.size,0);
-  const rel=((-spinAngle)%TAU+TAU)%TAU;
-  let cum=0;
-  for(let i=0;i<segments.length;i++){
-    const slice=(segments[i].size/total)*TAU;
-    cum+=slice;
-    if(rel<cum)return i;
-  }
-  return segments.length-1;
-}
+function updateCurrentPlayerBanner(){const p=players[spinPlayer];document.getElementById('currentPlayerBanner').innerHTML=`<div class="dot" style="background:${p.color};width:16px;height:16px"></div><span style="font-weight:800;color:#2C2C2A;font-size:1rem">${p.name} dreht!</span>`;document.getElementById('currentPlayerBanner').style.background=p.color+'18';document.getElementById('currentPlayerBanner').style.borderColor=p.color;}
 
+function calcHitIdx(){const TAU=Math.PI*2;const total=segments.reduce((s,g)=>s+g.size,0);const rel=((-spinAngle)%TAU+TAU)%TAU;let cum=0;for(let i=0;i<segments.length;i++){const sl=(segments[i].size/total)*TAU;cum+=sl;if(rel<cum)return i;}return segments.length-1;}
 function drawWheel(){
   const cv=document.getElementById('wCanvas');const ctx=cv.getContext('2d');
-  const cx=160,cy=160,r=152,TAU=Math.PI*2;
-  const total=segments.reduce((s,g)=>s+g.size,0);
+  const cx=160,cy=160,r=152,TAU=Math.PI*2;const total=segments.reduce((s,g)=>s+g.size,0);
   let a=-Math.PI/2+spinAngle;ctx.clearRect(0,0,320,320);
-  segments.forEach(seg=>{
-    const sl=(seg.size/total)*TAU;
-    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sl);ctx.closePath();
-    ctx.fillStyle=seg.type==='reward'?'#BA7517':seg.type==='free'?'#D3D1C7':seg.color;
-    ctx.fill();ctx.strokeStyle='#f7f5ff';ctx.lineWidth=2.5;ctx.stroke();
-    ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sl/2);
-    const label=seg.type==='reward'?'BONUS':seg.type==='free'?'FREI':seg.text;
-    ctx.font='bold '+(label.length>14?'10px':'12px')+' system-ui';
-    ctx.fillStyle='#fff';ctx.textAlign='right';ctx.fillText(label.substring(0,18),r-6,4);
-    ctx.restore();a+=sl;
-  });
+  segments.forEach(seg=>{const sl=(seg.size/total)*TAU;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sl);ctx.closePath();ctx.fillStyle=seg.type==='reward'?'#BA7517':seg.type==='free'?'#D3D1C7':seg.color;ctx.fill();ctx.strokeStyle='#f7f5ff';ctx.lineWidth=2.5;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sl/2);const label=seg.type==='reward'?'BONUS':seg.type==='free'?'FREI':seg.text;ctx.font='bold '+(label.length>14?'10px':'12px')+' system-ui';ctx.fillStyle='#fff';ctx.textAlign='right';ctx.fillText(label.substring(0,18),r-6,4);ctx.restore();a+=sl;});
   ctx.beginPath();ctx.arc(cx,cy,20,0,TAU);ctx.fillStyle='#f7f5ff';ctx.fill();
   ctx.beginPath();ctx.arc(cx,cy,16,0,TAU);ctx.fillStyle='#7F77DD';ctx.fill();
 }
-
-function spinWheel(){
-  if(spinning)return;spinning=true;document.getElementById('spinBtn').disabled=true;
-  document.getElementById('wheelResult').textContent='';
-  const extra=Math.PI*2*(8+Math.random()*8);const dur=3500+Math.random()*1500;
-  const t0=Date.now(),a0=spinAngle;
-  (function anim(){
-    const prog=Math.min((Date.now()-t0)/dur,1);const ease=1-Math.pow(1-prog,4);
-    spinAngle=a0+extra*ease;drawWheel();
-    if(prog<1){requestAnimationFrame(anim);}
-    else{pendingSegIdx=calcHitIdx();spinning=false;document.getElementById('spinBtn').disabled=false;land();}
-  })();
-}
+function spinWheel(){if(spinning)return;spinning=true;document.getElementById('spinBtn').disabled=true;document.getElementById('wheelResult').textContent='';const extra=Math.PI*2*(8+Math.random()*8);const dur=3500+Math.random()*1500;const t0=Date.now(),a0=spinAngle;(function anim(){const prog=Math.min((Date.now()-t0)/dur,1);const ease=1-Math.pow(1-prog,4);spinAngle=a0+extra*ease;drawWheel();if(prog<1){requestAnimationFrame(anim);}else{pendingSegIdx=calcHitIdx();spinning=false;document.getElementById('spinBtn').disabled=false;land();}})();}
 
 function land(){
-  const idx=pendingSegIdx;const seg=segments[idx];
-  seg.hits++;if(seg.hits>=3&&seg.size>0.4)seg.size=Math.max(0.3,seg.size*0.7);
+  const idx=pendingSegIdx;const seg=segments[idx];seg.hits++;if(seg.hits>=2&&seg.size>0.4)seg.size=Math.max(0.25,seg.size*0.65);
   const pname=players[spinPlayer].name;
   if(seg.type==='free'){document.getElementById('wheelResult').textContent='Freies Feld! '+pname+' trägt ein';setTimeout(()=>startFreeField(idx),1200);}
   else if(seg.type==='reward'){document.getElementById('wheelResult').textContent='Belohnungsfeld!';setTimeout(()=>showReward(pname),1000);}
-  else{const mult=pendingBomb?2:1;pendingBomb=false;document.getElementById('wheelResult').textContent=pname+' > '+seg.text+(mult>1?' (DOPPELT!)':'');setTimeout(()=>{document.getElementById('taskPlayer').textContent=pname;document.getElementById('taskPlayer').style.color=players[spinPlayer].color;document.getElementById('taskTxt').textContent=seg.text+(mult>1?'\n\nDOPPELTE STRAFE!':'');go('s-task');},1000);}
+  else{const mult=pendingBomb?2:1;pendingBomb=false;document.getElementById('wheelResult').textContent=pname+' > '+seg.text+(mult>1?' (DOPPELT!)':'');setTimeout(()=>{document.getElementById('taskPlayer').textContent=pname;document.getElementById('taskPlayer').style.color=players[spinPlayer].color;document.getElementById('taskTxt').textContent=seg.text+(mult>1?' DOPPELTE STRAFE!':'');go('s-task');},1000);}
 }
-
 function taskDone(){nextSpin();}
-function nextSpin(){spinPlayer=(spinPlayer+1)%players.length;drawWheel();go('s-wheel');}
+function nextSpin(){spinPlayer=(spinPlayer+1)%players.length;drawWheel();updateCurrentPlayerBanner();go('s-wheel');}
 
-function startFreeField(segIdx){
-  ffSec=60;const bubble=document.getElementById('fftimer');bubble.textContent=60;bubble.className='timer-bubble';bubble.style.cssText='';
-  document.getElementById('ffTxt').value='';document.getElementById('ffTxt').dataset.si=segIdx;
-  if(ffInt)clearInterval(ffInt);go('s-freefield');
-  const shrinkT=setTimeout(()=>{bubble.style.cssText='width:40px;height:40px;border:3px solid #7F77DD;font-size:0.85rem;font-weight:800;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#534AB7;margin:0 0 0 auto';},3000);
-  ffInt=setInterval(()=>{ffSec--;bubble.textContent=ffSec;if(ffSec<=10)bubble.className='timer-bubble danger';if(ffSec<=0){clearInterval(ffInt);clearTimeout(shrinkT);bubble.style.cssText='';penaltyFF();}},1000);
-}
+function startFreeField(segIdx){ffSec=60;const bubble=document.getElementById('fftimer');bubble.textContent=60;bubble.className='timer-bubble';bubble.style.cssText='';document.getElementById('ffTxt').value='';document.getElementById('ffTxt').dataset.si=segIdx;document.getElementById('ffRandomWrap').style.display='none';document.getElementById('ffRandomNextBtn').style.display='none';if(ffInt)clearInterval(ffInt);go('s-freefield');const shrinkT=setTimeout(()=>{bubble.style.cssText='width:40px;height:40px;border:3px solid #7F77DD;font-size:0.85rem;font-weight:800;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#534AB7;margin:0 0 0 auto';},3000);ffInt=setInterval(()=>{ffSec--;bubble.textContent=ffSec;if(ffSec<=10)bubble.className='timer-bubble danger';if(ffSec<=0){clearInterval(ffInt);clearTimeout(shrinkT);bubble.style.cssText='';penaltyFF();}},1000);}
 function penaltyFF(){toast(players[spinPlayer].name+' – Zeit abgelaufen!',3000);nextSpin();}
-function confirmFreeField(){
-  const t=document.getElementById('ffTxt').value.trim();if(!t){toast('Bitte etwas eintragen!');return;}
-  if(ffInt)clearInterval(ffInt);document.getElementById('fftimer').style.cssText='';
-  const si=parseInt(document.getElementById('ffTxt').dataset.si);
-  segments[si]={type:'player',text:t,size:1,owner:spinPlayer,color:players[spinPlayer].color,hits:0};
-  nextSpin();
-}
+function confirmFreeField(){const t=document.getElementById('ffTxt').value.trim();if(!t){toast('Bitte etwas eintragen!');return;}if(ffInt)clearInterval(ffInt);document.getElementById('fftimer').style.cssText='';const si=parseInt(document.getElementById('ffTxt').dataset.si);segments[si]={type:'player',text:t,size:1,owner:spinPlayer,color:players[spinPlayer].color,hits:0};nextSpin();}
+
+function showAddFieldOverlay(){document.getElementById('addFieldTxt').value='';document.getElementById('addFieldRandomWrap').style.display='none';document.getElementById('addFieldNextBtn').style.display='none';document.getElementById('addFieldOverlay').style.display='flex';}
+function closeAddFieldOverlay(){document.getElementById('addFieldOverlay').style.display='none';}
+function confirmAddField(){const t=document.getElementById('addFieldTxt').value.trim();if(!t){toast('Bitte etwas eintragen!');return;}segments.push({type:'player',text:t,size:1,owner:spinPlayer,color:players[spinPlayer].color,hits:0});closeAddFieldOverlay();drawWheel();toast('Feld hinzugefügt!');}
 
 function showReward(pname){
   document.getElementById('rewardPName').textContent=pname+' zieht eine Belohnungskarte';
@@ -474,23 +430,12 @@ function showReward(pname){
   document.getElementById('rewardCard').innerHTML=`<div class="reward-opt"><div class="reward-icon-big">${card.icon}</div><div class="reward-title">${card.title}</div><div class="reward-desc">${card.desc}</div></div>`;
   const sel=document.getElementById('rewardSegSel');document.getElementById('rewardConfBtn').style.display='none';
   if(card.action==='bomb'){pendingBomb=true;sel.style.display='none';sel.innerHTML='';}
-  else{const eligible=segments.filter(s=>s.type==='player');if(eligible.length===0){sel.style.display='block';sel.innerHTML='<div style="color:#888780;text-align:center;padding:0.75rem;font-size:0.9rem">Noch keine Spieler-Felder vorhanden</div>';}else{sel.style.display='block';sel.innerHTML='<div class="label" style="margin-top:0.5rem">Feld auswählen</div>'+segments.map((s,i)=>{if(s.type!=='player')return'';return`<div class="seg-item" id="rs${i}" onclick="selRewardSeg(${i})"><div class="dot" style="background:${s.color}"></div><span style="flex:1;font-weight:600;color:#2C2C2A;font-size:0.9rem">${s.text}</span><span style="font-size:0.75rem;color:#888780">${players[s.owner]?.name||''}</span></div>`;}).join('');}}
+  else{const eligible=segments.filter(s=>s.type==='player');if(eligible.length===0){sel.style.display='block';sel.innerHTML='<div style="color:#888780;text-align:center;padding:0.75rem;font-size:0.9rem">Noch keine Spieler-Felder vorhanden</div>';}else{sel.style.display='block';sel.innerHTML='<div class="label" style="margin-top:0.5rem">Feld auswählen</div>'+segments.map((s,i)=>{if(s.type!=='player')return'';return`<div class="seg-item" id="rs${i}" style="cursor:pointer;border:1.5px solid #EEEDFE" onclick="selRewardSeg(${i})"><div class="dot" style="background:${s.color}"></div><span style="flex:1;font-weight:600;color:#2C2C2A;font-size:0.9rem">${s.text}</span><span style="font-size:0.75rem;color:#888780">${players[s.owner]?.name||''}</span></div>`;}).join('');}}
   go('s-reward');
 }
-function selRewardSeg(i){
-  if(rewardAction==='edit'){const nt=prompt('Neuer Text:',segments[i].text);if(nt&&nt.trim()){segments[i].text=nt.trim();toast('Feld geändert!');afterReward();}return;}
-  if(rewardAction==='swap'){if(swapFirst===-1){swapFirst=i;document.getElementById('rs'+i).classList.add('selected');toast('Zweites Feld wählen');}else if(swapFirst!==i){rewardSeg=i;document.getElementById('rewardConfBtn').style.display='flex';}return;}
-  rewardSeg=i;document.querySelectorAll('[id^="rs"]').forEach(e=>e.classList.remove('selected'));document.getElementById('rs'+i).classList.add('selected');document.getElementById('rewardConfBtn').style.display='flex';
-}
-function applyReward(){
-  const a=rewardAction,i=rewardSeg;
-  if(a==='delete'){segments[i]={type:'free',text:'',size:1,owner:null,color:'#D3D1C7',hits:0};toast('Feld gelöscht!');}
-  else if(a==='grow'){segments[i].size=Math.min(segments[i].size*2,4);toast('Feld vergrößert!');}
-  else if(a==='shrink'){segments[i].size=Math.max(segments[i].size*0.5,0.25);toast('Feld verkleinert!');}
-  else if(a==='swap'&&swapFirst>=0){[segments[i],segments[swapFirst]]=[segments[swapFirst],segments[i]];toast('Felder getauscht!');}
-  afterReward();
-}
-function afterReward(){drawWheel();go('s-wheel');}
+function selRewardSeg(i){if(rewardAction==='edit'){const nt=prompt('Neuer Text:',segments[i].text);if(nt&&nt.trim()){segments[i].text=nt.trim();toast('Feld geändert!');afterReward();}return;}if(rewardAction==='swap'){if(swapFirst===-1){swapFirst=i;document.getElementById('rs'+i).style.borderColor='#7F77DD';toast('Zweites Feld wählen');}else if(swapFirst!==i){rewardSeg=i;document.getElementById('rewardConfBtn').style.display='flex';}return;}rewardSeg=i;document.querySelectorAll('[id^="rs"]').forEach(e=>e.style.borderColor='#EEEDFE');document.getElementById('rs'+i).style.borderColor='#7F77DD';document.getElementById('rewardConfBtn').style.display='flex';}
+function applyReward(){const a=rewardAction,i=rewardSeg;if(a==='delete'){segments[i]={type:'free',text:'',size:1,owner:null,color:'#D3D1C7',hits:0};toast('Feld gelöscht!');}else if(a==='grow'){segments[i].size=Math.min(segments[i].size*2,4);toast('Feld vergrößert!');}else if(a==='shrink'){segments[i].size=Math.max(segments[i].size*0.5,0.25);toast('Feld verkleinert!');}else if(a==='swap'&&swapFirst>=0){[segments[i],segments[swapFirst]]=[segments[swapFirst],segments[i]];toast('Felder getauscht!');}afterReward();}
+function afterReward(){drawWheel();updateCurrentPlayerBanner();go('s-wheel');}
 </script>
 </body>
 </html>
