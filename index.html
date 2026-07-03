@@ -85,6 +85,40 @@ textarea:focus{border-color:#7F77DD}
 .random-card{background:#fff;border:2px solid #CECBF6;border-radius:14px;padding:1.25rem;width:100%;max-width:380px;text-align:center;min-height:60px;display:flex;align-items:center;justify-content:center;margin-bottom:0.75rem}
 .random-card-text{font-size:1.1rem;font-weight:700;color:#2C2C2A;line-height:1.4}
 .add-field-row{display:flex;gap:8px;width:100%;max-width:380px;margin-top:0.25rem}
+
+/* ═══ MEMORY ═══ */
+.mem-board{display:grid;gap:6px;width:100%;max-width:380px;margin:0.5rem 0}
+.mem-card{aspect-ratio:1;border-radius:10px;border:2px solid #CECBF6;background:#EEEDFE;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;transition:transform 0.15s,background 0.15s;user-select:none;-webkit-user-select:none}
+.mem-card.flipped{background:#fff;border-color:#7F77DD}
+.mem-card.matched{background:#E1F5EE;border-color:#1D9E75;pointer-events:none}
+.mem-card.wrong{background:#FCEBEB;border-color:#E24B4A;animation:memWrong 0.4s ease}
+@keyframes memWrong{0%{transform:scale(1)}50%{transform:scale(0.9)}100%{transform:scale(1)}}
+.mem-scoreboard{display:flex;gap:8px;width:100%;max-width:380px;margin-bottom:0.5rem;flex-wrap:wrap}
+.mem-score-chip{flex:1;min-width:70px;background:#fff;border:1.5px solid #CECBF6;border-radius:10px;padding:0.4rem 0.5rem;text-align:center}
+.mem-score-name{font-size:0.65rem;font-weight:700;color:#888780;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mem-score-val{font-size:1.3rem;font-weight:800;color:#534AB7}
+.mem-turn-banner{width:100%;max-width:380px;border-radius:10px;padding:0.5rem 1rem;text-align:center;font-weight:700;font-size:0.9rem;margin-bottom:0.5rem;border:1.5px solid transparent}
+
+/* ═══ MUENZEN ═══ */
+.coin-display{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:100%;max-width:380px;margin:0.75rem 0;padding:1rem;background:#fff;border:1.5px solid #CECBF6;border-radius:16px}
+.coin{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;border:3px solid;line-height:1}
+.euro-input{display:flex;align-items:center;justify-content:center;gap:4px;font-size:1.8rem;font-weight:800;color:#2C2C2A;margin:0.75rem 0;width:100%;max-width:380px}
+.euro-digit{width:44px;height:56px;border:2px solid #CECBF6;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:800;color:#3C3489;cursor:default}
+.euro-digit.active{border-color:#7F77DD;background:#EEEDFE}
+.euro-sep{font-size:1.5rem;font-weight:800;color:#888780}
+.money-timer-bar{width:100%;max-width:380px;height:8px;background:#EEEDFE;border-radius:4px;margin-bottom:0.75rem;overflow:hidden}
+.money-timer-fill{height:100%;background:#7F77DD;border-radius:4px;transition:width 0.1s linear}
+.player-answer-row{display:flex;align-items:center;justify-content:space-between;padding:0.6rem 1rem;background:#fff;border:1.5px solid #EEEDFE;border-radius:10px;margin-bottom:0.4rem;width:100%;max-width:380px}
+
+/* ═══ HOCHZAEHLEN ═══ */
+.count-number{font-size:5rem;font-weight:800;text-align:center;color:#534AB7;line-height:1;margin:0.5rem 0}
+.count-target{font-size:1rem;font-weight:700;text-align:center;color:#888780;margin-bottom:0.25rem}
+.count-log{width:100%;max-width:380px;max-height:120px;overflow-y:auto;background:#EEEDFE;border-radius:10px;padding:0.5rem;margin-bottom:0.5rem;font-size:0.85rem;font-weight:700;color:#3C3489;text-align:center;line-height:1.8}
+.timer-ring-wrap{position:relative;width:110px;height:110px;margin:0.5rem auto}
+.timer-ring-wrap svg{transform:rotate(-90deg)}
+.timer-ring-bg{fill:none;stroke:#EEEDFE;stroke-width:8}
+.timer-ring-fg{fill:none;stroke:#7F77DD;stroke-width:8;stroke-linecap:round}
+.timer-ring-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:#3C3489}
 </style>
 </head>
 <body>
@@ -92,6 +126,7 @@ textarea:focus{border-color:#7F77DD}
 <div class="hot-wrong-overlay" id="hotOverlay"></div>
 <div class="toast" id="toast"></div>
 
+<!-- SETUP -->
 <div class="screen active" id="s-setup">
   <div id="mainTitle" style="margin-bottom:0.2rem"></div>
   <div class="page-sub">Trinkspiel ab 2 Spielern</div>
@@ -102,6 +137,7 @@ textarea:focus{border-color:#7F77DD}
   <button class="btn btn-primary" id="startBtn" disabled onclick="startGame()">Spiel starten</button>
 </div>
 
+<!-- CHALLENGE MENU -->
 <div class="screen" id="s-chmenu">
   <div id="chTitle" style="margin-bottom:0.2rem"></div>
   <div class="page-sub">5 Runden &middot; Sieger befüllt ein Feld</div>
@@ -111,6 +147,7 @@ textarea:focus{border-color:#7F77DD}
   <button class="btn btn-primary" onclick="launchChallenge()">Challenge starten</button>
 </div>
 
+<!-- HOEHER TIEFER -->
 <div class="screen" id="s-hot">
   <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
   <div class="badge" style="background:#EEEDFE;color:#534AB7;margin-bottom:0.75rem">Höher oder Tiefer</div>
@@ -127,6 +164,7 @@ textarea:focus{border-color:#7F77DD}
   </div>
 </div>
 
+<!-- ROULETTE -->
 <div class="screen" id="s-roulette">
   <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
   <div class="badge" style="background:#FCEBEB;color:#791F1F;margin-bottom:0.75rem">Russisch Roulette</div>
@@ -152,6 +190,7 @@ textarea:focus{border-color:#7F77DD}
   <button class="btn btn-danger" id="shootBtn" onclick="shoot()">Abdrücken</button>
 </div>
 
+<!-- TIME STOP -->
 <div class="screen" id="s-ts">
   <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
   <div class="badge" style="background:#E1F5EE;color:#085041;margin-bottom:1rem">Time Stop</div>
@@ -163,12 +202,14 @@ textarea:focus{border-color:#7F77DD}
   <div id="tsResults" style="width:100%;max-width:380px;margin-top:1rem"></div>
 </div>
 
+<!-- BID -->
 <div class="screen" id="s-bid">
   <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
   <div class="badge" style="background:#FAEEDA;color:#633806;margin-bottom:1rem">Bieter-Duell</div>
   <div id="bidContent" style="width:100%;max-width:380px"></div>
 </div>
 
+<!-- FLI FLA FLU -->
 <div class="screen" id="s-flu">
   <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
   <div class="badge" style="background:#EEEDFE;color:#3C3489;margin-bottom:1rem">Fli Fla Flu</div>
@@ -181,6 +222,156 @@ textarea:focus{border-color:#7F77DD}
   <div id="fluPlayerBtns" style="width:100%;max-width:380px"></div>
 </div>
 
+<!-- MEMORY -->
+<div class="screen" id="s-memory">
+  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
+  <div class="badge" style="background:#EEEDFE;color:#534AB7;margin-bottom:0.5rem">Memory</div>
+  <div id="memScoreboard" class="mem-scoreboard"></div>
+  <div id="memTurnBanner" class="mem-turn-banner"></div>
+  <div id="memBoard" class="mem-board"></div>
+  <div id="memStatus" style="font-size:0.85rem;color:#888780;text-align:center;min-height:1.2rem"></div>
+</div>
+
+<!-- GELD ZAEHLEN: COVER -->
+<div class="screen" id="s-money-cover">
+  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
+  <div class="badge" style="background:#FAEEDA;color:#633806;margin-bottom:1rem">Geld zählen</div>
+  <div id="moneyCoverProgress" style="font-size:0.85rem;color:#888780;margin-bottom:0.75rem;font-weight:700;text-align:center"></div>
+  <div id="moneyCoverBanner" style="width:100%;max-width:380px;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:12px;border:2px solid transparent">
+    <div class="dot" id="moneyCoverDot" style="width:16px;height:16px"></div>
+    <div><div id="moneyCoverName" style="font-size:1.3rem;font-weight:800"></div><div style="font-size:0.85rem;color:#888780;margin-top:0.1rem">ist dran</div></div>
+  </div>
+  <div style="background:#fff;border:1.5px solid #CECBF6;border-radius:14px;padding:1.25rem;width:100%;max-width:380px;text-align:center;margin-bottom:1.5rem">
+    <div style="font-size:0.85rem;color:#888780;margin-bottom:0.4rem">Du siehst gleich Münzen für</div>
+    <div style="font-size:1.8rem;font-weight:800;color:#3C3489">12 Sekunden</div>
+    <div style="font-size:0.85rem;color:#888780;margin-top:0.4rem">Danach Betrag eintippen</div>
+  </div>
+  <button class="btn btn-primary" onclick="moneyStartTimer()">START</button>
+</div>
+
+<!-- GELD ZAEHLEN: MÜNZEN + TIMER -->
+<div class="screen" id="s-money-eq">
+  <div class="badge" style="background:#FAEEDA;color:#633806;margin-bottom:0.75rem">Geld zählen</div>
+  <div id="moneyEqPlayerTag" style="font-size:0.85rem;font-weight:700;color:#888780;text-align:center;margin-bottom:0.5rem"></div>
+  <div id="moneyCoinDisplay" class="coin-display" style="margin-bottom:0.75rem"></div>
+  <div class="timer-ring-wrap">
+    <svg width="110" height="110" viewBox="0 0 110 110">
+      <circle class="timer-ring-bg" cx="55" cy="55" r="46"/>
+      <circle class="timer-ring-fg" id="moneyTimerRing" cx="55" cy="55" r="46"/>
+    </svg>
+    <div class="timer-ring-text" id="moneyTimerText">12</div>
+  </div>
+  <div style="color:#888780;font-size:0.85rem;text-align:center;margin-top:0.25rem">Sekunden – dann Eingabe</div>
+</div>
+
+<!-- GELD ZAEHLEN: EINGABE -->
+<div class="screen" id="s-money-input">
+  <div class="badge" style="background:#FAEEDA;color:#633806;margin-bottom:0.75rem">Geld zählen</div>
+  <div id="moneyInputBanner" style="width:100%;max-width:380px;border-radius:12px;padding:0.75rem 1rem;margin-bottom:0.75rem;display:flex;align-items:center;gap:10px;border:2px solid transparent">
+    <div class="dot" id="moneyInputDot" style="width:14px;height:14px"></div>
+    <span id="moneyInputName" style="font-weight:800;font-size:1rem"></span>
+    <span style="color:#888780;font-size:0.85rem">– Betrag eingeben</span>
+  </div>
+  <div style="background:#EEEDFE;border-radius:14px;padding:1rem;width:100%;max-width:380px;text-align:center;margin-bottom:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.75rem">
+    <span style="font-size:1.5rem">🙈</span>
+    <span style="font-size:0.9rem;font-weight:700;color:#888780">Münzen sind verdeckt</span>
+  </div>
+  <!-- Euro Eingabe: __€__Cent -->
+  <div id="moneyInputDisp" style="display:flex;align-items:center;justify-content:center;gap:6px;font-size:2rem;font-weight:800;color:#2C2C2A;margin-bottom:0.75rem;width:100%;max-width:380px">
+    <div class="euro-digit active" id="med0">0</div>
+    <div class="euro-digit" id="med1">0</div>
+    <div class="euro-sep">€</div>
+    <div class="euro-digit" id="med2">0</div>
+    <div class="euro-digit" id="med3">0</div>
+    <div class="euro-sep">¢</div>
+  </div>
+  <div class="num-pad">
+    <button class="num-btn" onclick="moneyInputDigit(1)">1</button>
+    <button class="num-btn" onclick="moneyInputDigit(2)">2</button>
+    <button class="num-btn" onclick="moneyInputDigit(3)">3</button>
+    <button class="num-btn" onclick="moneyInputDigit(4)">4</button>
+    <button class="num-btn" onclick="moneyInputDigit(5)">5</button>
+    <button class="num-btn" onclick="moneyInputDigit(6)">6</button>
+    <button class="num-btn" onclick="moneyInputDigit(7)">7</button>
+    <button class="num-btn" onclick="moneyInputDigit(8)">8</button>
+    <button class="num-btn" onclick="moneyInputDigit(9)">9</button>
+    <button class="num-btn" onclick="moneyInputDigit('del')" style="background:#FCEBEB;color:#E24B4A">⌫</button>
+    <button class="num-btn" onclick="moneyInputDigit(0)">0</button>
+    <button class="num-btn" onclick="moneyInputDigit('ok')" style="background:#E1F5EE;color:#085041">OK</button>
+  </div>
+</div>
+
+<!-- ADDIEREN: COVER -->
+<div class="screen" id="s-add-cover">
+  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
+  <div class="badge" style="background:#E1F5EE;color:#085041;margin-bottom:1rem">Addieren</div>
+  <div id="addCoverProgress" style="font-size:0.85rem;color:#888780;margin-bottom:0.75rem;font-weight:700;text-align:center"></div>
+  <div id="addCoverBanner" style="width:100%;max-width:380px;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:12px;border:2px solid transparent">
+    <div class="dot" id="addCoverDot" style="width:16px;height:16px"></div>
+    <div><div id="addCoverName" style="font-size:1.3rem;font-weight:800"></div><div style="font-size:0.85rem;color:#888780;margin-top:0.1rem">ist dran</div></div>
+  </div>
+  <div style="background:#fff;border:1.5px solid #CECBF6;border-radius:14px;padding:1.25rem;width:100%;max-width:380px;text-align:center;margin-bottom:1.5rem">
+    <div style="font-size:0.85rem;color:#888780;margin-bottom:0.4rem">Du siehst gleich die Gleichung für</div>
+    <div style="font-size:1.8rem;font-weight:800;color:#3C3489">12 Sekunden</div>
+    <div style="font-size:0.85rem;color:#888780;margin-top:0.4rem">Danach sofort Antwort eintippen</div>
+  </div>
+  <button class="btn btn-primary" onclick="addStartTimer()">START</button>
+</div>
+
+<!-- ADDIEREN: GLEICHUNG + TIMER -->
+<div class="screen" id="s-add-eq">
+  <div class="badge" style="background:#E1F5EE;color:#085041;margin-bottom:0.75rem">Addieren</div>
+  <div id="addEqPlayerTag" style="font-size:0.85rem;font-weight:700;color:#888780;text-align:center;margin-bottom:0.5rem"></div>
+  <div id="addEqDisplay" style="background:#fff;border:1.5px solid #CECBF6;border-radius:16px;padding:1.25rem;width:100%;max-width:380px;margin-bottom:0.75rem;text-align:center;line-height:2.2;font-size:1rem"></div>
+  <div class="timer-ring-wrap">
+    <svg width="110" height="110" viewBox="0 0 110 110">
+      <circle class="timer-ring-bg" cx="55" cy="55" r="46"/>
+      <circle class="timer-ring-fg" id="addTimerRing" cx="55" cy="55" r="46"/>
+    </svg>
+    <div class="timer-ring-text" id="addTimerText">12</div>
+  </div>
+  <div style="color:#888780;font-size:0.85rem;text-align:center;margin-top:0.25rem">Sekunden – dann Eingabe</div>
+</div>
+
+<!-- ADDIEREN: EINGABE -->
+<div class="screen" id="s-add-input">
+  <div class="badge" style="background:#E1F5EE;color:#085041;margin-bottom:0.75rem">Addieren</div>
+  <div id="addInputBanner" style="width:100%;max-width:380px;border-radius:12px;padding:0.75rem 1rem;margin-bottom:0.75rem;display:flex;align-items:center;gap:10px;border:2px solid transparent">
+    <div class="dot" id="addInputDot" style="width:14px;height:14px"></div>
+    <span id="addInputName" style="font-weight:800;font-size:1rem"></span>
+    <span style="color:#888780;font-size:0.85rem">– Antwort eingeben</span>
+  </div>
+  <div style="background:#EEEDFE;border-radius:14px;padding:1rem;width:100%;max-width:380px;text-align:center;margin-bottom:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.75rem">
+    <span style="font-size:1.5rem">🙈</span>
+    <span style="font-size:0.9rem;font-weight:700;color:#888780">Gleichung ist verdeckt</span>
+  </div>
+  <div id="addInputDisp" style="font-size:3rem;font-weight:800;text-align:center;color:#3C3489;min-height:72px;display:flex;align-items:center;justify-content:center;letter-spacing:2px;border:2px solid #CECBF6;border-radius:12px;background:#fff;margin-bottom:0.75rem;width:100%;max-width:380px">?</div>
+  <div class="num-pad">
+    <button class="num-btn" onclick="addInputDigit('1')">1</button>
+    <button class="num-btn" onclick="addInputDigit('2')">2</button>
+    <button class="num-btn" onclick="addInputDigit('3')">3</button>
+    <button class="num-btn" onclick="addInputDigit('4')">4</button>
+    <button class="num-btn" onclick="addInputDigit('5')">5</button>
+    <button class="num-btn" onclick="addInputDigit('6')">6</button>
+    <button class="num-btn" onclick="addInputDigit('7')">7</button>
+    <button class="num-btn" onclick="addInputDigit('8')">8</button>
+    <button class="num-btn" onclick="addInputDigit('9')">9</button>
+    <button class="num-btn" onclick="addInputDigit('neg')" style="background:#FAEEDA;color:#633806">±</button>
+    <button class="num-btn" onclick="addInputDigit('0')">0</button>
+    <button class="num-btn" onclick="addInputDigit('del')" style="background:#FCEBEB;color:#E24B4A">⌫</button>
+  </div>
+  <div style="height:0.5rem"></div>
+  <button class="btn btn-primary" onclick="addConfirm()">Bestätigen</button>
+</div>
+
+<!-- HOCHZAEHLEN -->
+<div class="screen" id="s-count">
+  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
+  <div class="badge" style="background:#FCEBEB;color:#791F1F;margin-bottom:0.5rem">Hochzählen</div>
+  <div id="countContent" style="width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center"></div>
+</div>
+
+<!-- WINNER -->
 <div class="screen" id="s-winner">
   <div style="font-size:3.5rem;text-align:center;margin:0.5rem 0">&#127942;</div>
   <div id="winName" style="font-size:1.6rem;font-weight:800;text-align:center;margin-bottom:0.2rem"></div>
@@ -199,6 +390,7 @@ textarea:focus{border-color:#7F77DD}
   <button class="btn btn-primary" onclick="confirmField()">Bestätigen</button>
 </div>
 
+<!-- WHEEL -->
 <div class="screen" id="s-wheel">
   <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#888780;margin-bottom:0.25rem">Das Rad</div>
   <div id="currentPlayerBanner" class="current-player-banner"></div>
@@ -211,6 +403,7 @@ textarea:focus{border-color:#7F77DD}
   </div>
 </div>
 
+<!-- FREE FIELD -->
 <div class="screen" id="s-freefield">
   <div style="font-size:3rem;text-align:center;margin-bottom:0.5rem">&#9889;</div>
   <div style="font-size:1.2rem;font-weight:800;text-align:center;color:#2C2C2A;margin-bottom:0.2rem">Freies Feld!</div>
@@ -227,6 +420,7 @@ textarea:focus{border-color:#7F77DD}
   <button class="btn btn-primary" onclick="confirmFreeField()">Bestätigen</button>
 </div>
 
+<!-- TASK -->
 <div class="screen" id="s-task">
   <div style="font-size:3rem;text-align:center;margin-bottom:0.5rem">&#127919;</div>
   <div id="taskPlayer" style="font-size:1.3rem;font-weight:800;text-align:center;margin-bottom:0.2rem"></div>
@@ -236,6 +430,7 @@ textarea:focus{border-color:#7F77DD}
   <button class="btn btn-primary" onclick="taskDone()">&rarr; Weiter</button>
 </div>
 
+<!-- REWARD -->
 <div class="screen" id="s-reward">
   <div style="font-size:3rem;text-align:center;margin-bottom:0.5rem">&#127873;</div>
   <div style="font-size:1.2rem;font-weight:800;text-align:center;color:#2C2C2A;margin-bottom:0.2rem">Belohnungsfeld!</div>
@@ -248,12 +443,14 @@ textarea:focus{border-color:#7F77DD}
   <button class="btn btn-secondary" onclick="afterReward()">Weiter &rarr;</button>
 </div>
 
+<!-- SEGS -->
 <div class="screen" id="s-segs">
   <button class="back-btn" onclick="go('s-wheel');drawWheel()">&larr; Zurück</button>
   <div class="label">Alle Felder</div>
   <div id="segList" style="width:100%;max-width:380px"></div>
 </div>
 
+<!-- ADD FIELD OVERLAY -->
 <div id="addFieldOverlay" style="display:none;position:fixed;inset:0;background:rgba(92,80,180,0.18);z-index:200;align-items:flex-end;justify-content:center">
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:1.5rem 1rem 2rem;border-top:1.5px solid #CECBF6">
     <div style="font-weight:800;font-size:1.1rem;color:#2C2C2A;margin-bottom:0.75rem;text-align:center">Neues Feld hinzufügen</div>
@@ -271,14 +468,17 @@ textarea:focus{border-color:#7F77DD}
 </div>
 
 <script>
+/* ═══ TITLE ═══ */
 const TITLE_COLORS=['#7F77DD','#E24B4A','#1D9E75','#BA7517','#D4537E','#378ADD','#D85A30','#534AB7','#0891B2','#7C3AED'];
 function coloredText(t){let c=0;return t.split('').map(ch=>ch===' '?'<span style="display:inline-block;width:0.35em"> </span>':`<span style="color:${TITLE_COLORS[c++%TITLE_COLORS.length]}">${ch}</span>`).join('');}
 document.getElementById('mainTitle').innerHTML=`<div style="font-size:2rem;font-weight:800;letter-spacing:-0.5px;line-height:1.2;text-align:center">${coloredText('Wheel of')}<br>${coloredText('Misfortune')}</div>`;
 document.getElementById('chTitle').innerHTML=`<div style="font-size:1.4rem;font-weight:800;letter-spacing:-0.5px;text-align:center">${coloredText('Challenge-Phase')}</div>`;
 
+/* ═══ CONSTANTS ═══ */
 const PCOLORS=['#7F77DD','#E24B4A','#1D9E75','#BA7517','#D4537E','#378ADD','#D85A30','#534AB7'];
-const CHALLENGES=['hot','roulette','ts','bid','flu'];
-const CHNAMES={hot:'Höher oder Tiefer',roulette:'Russisch Roulette',ts:'Time Stop',bid:'Bieter-Duell',flu:'Fli Fla Flu'};
+const ALL_CHALLENGES=['hot','roulette','ts','bid','flu','memory','money','addup','countup'];
+const CHNAMES={hot:'Höher oder Tiefer',roulette:'Russisch Roulette',ts:'Time Stop',bid:'Bieter-Duell',flu:'Fli Fla Flu',memory:'Memory',money:'Geld zählen',addup:'Addieren',countup:'Hochzählen'};
+const CHEMOJI={hot:'🃏',roulette:'🔫',ts:'⏱️',bid:'💰',flu:'✂️',memory:'🧩',money:'💶',addup:'➕',countup:'🔢'};
 const REWARDS=[
   {icon:'✏️',title:'Redakteur',desc:'Verändere den Text eines beliebigen Feldes',action:'edit'},
   {icon:'🗑️',title:'Auslöscher',desc:'Lösche ein Feld – es wird wieder frei',action:'delete'},
@@ -289,58 +489,105 @@ const REWARDS=[
 ];
 const RANDOM_TASKS=['Trinke 3 Schlücke','Trinke 1 Shot','Wasserfall','Trinkbuddy für 3 Runden','Auf EX','Deine Nachbarn trinken','Imitiere ein Tier','Abstimmung wer trinkt',"Verschick' ein Selfie",'Trinke 2 Schlücke','Trinke 4 Schlücke','Trinke 5 Schlücke','Trinkspruch','Redewendung','Kompliment an alle','Trinke aus einem anderen Getränk'];
 
-let players=[],segments=[],chOrder=[],chIdx=0,spinPlayer=0,firstSpinPlayer=0;
+const MEM_EMOJIS=['🐶','🐱','🐭','🐸','🦊','🐼','🐨','🦁','🦋','🐬','🍎','🍊','🍋','🍇','🍓','🍒','🥝','🍍','🏀','⚽','🎾','🏈','🏐','🎱','🚗','🚂','✈️','🚢','🛵','🚁','🇩🇪','🇫🇷','🇮🇹','🇧🇷','🇯🇵','❤️','🧡','💛','💚','💙','💜','🖤','🤍','💗','💖'];
+
+/* ═══ COIN DEFINITIONS ═══ */
+const COINS=[
+  {v:1,   label:'1¢',  size:28, bg:'#b87333', border:'#8B5e3c', textColor:'#fff', stroke:'#d4955a'},
+  {v:2,   label:'2¢',  size:28, bg:'#b87333', border:'#8B5e3c', textColor:'#fff', stroke:'#d4955a'},
+  {v:5,   label:'5¢',  size:30, bg:'#b87333', border:'#8B5e3c', textColor:'#fff', stroke:'#d4955a'},
+  {v:10,  label:'10¢', size:32, bg:'#d4a843', border:'#a07820', textColor:'#fff', stroke:'#f0c96a'},
+  {v:20,  label:'20¢', size:34, bg:'#d4a843', border:'#a07820', textColor:'#fff', stroke:'#f0c96a'},
+  {v:50,  label:'50¢', size:36, bg:'#d4a843', border:'#a07820', textColor:'#fff', stroke:'#f0c96a'},
+  {v:100, label:'1€',  size:38, bg:'#aaa9ad', border:'#6e6e72', textColor:'#2C2C2A', stroke:'#d0cfd3', inner:'#d4a843'},
+  {v:200, label:'2€',  size:40, bg:'#aaa9ad', border:'#6e6e72', textColor:'#2C2C2A', stroke:'#d0cfd3', inner:'#d4a843'},
+];
+
+/* ═══ STATE ═══ */
+let players=[],segments=[],chOrder=[],chIdx=0,spinPlayer=0;
 let spinAngle=0,spinning=false,pendingSegIdx=-1;
 let rAlive=[],rPIdx=0,rBangPos=0,rShotCount=0;
 let hotAlive=[],hotPIdx=0,hotVal=0;
-let tsTarget=0,tsRunning=false,tsT0=0,tsTimes=[],tsPIdx=0,tsCount=0,tsStartIdx=0;
+let tsTarget=0,tsRunning=false,tsT0=0,tsTimes=[],tsPIdx=0,tsCount=0;
 let bid={};
 let fluAlive=[];
 let ffInt=null,ffSec=60,ftInt=null,ftSec=60;
 let pendingBomb=false,rewardAction=null,rewardSeg=-1,swapFirst=-1;
 let winnerPIdx=-1,lastRandomIdx=-1;
 
+/* ═══ UTILS ═══ */
 function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
 function toast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function doFlash(){const f=document.getElementById('flash');f.classList.add('show');setTimeout(()=>f.classList.remove('show'),400);}
 function rnd(n){return Math.floor(Math.random()*n);}
 function shuffleArr(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=rnd(i+1);[b[i],b[j]]=[b[j],b[i]];}return b;}
 
+/* ═══ SETUP ═══ */
 document.getElementById('nameInp').addEventListener('keydown',e=>{if(e.key==='Enter')addPlayer();});
 document.getElementById('segsBtn').addEventListener('click',()=>{
-  document.getElementById('segList').innerHTML=segments.map(s=>`<div class="seg-item" style="cursor:default"><div class="dot" style="background:${s.type==='reward'?'#BA7517':s.type==='free'?'#888780':s.color}"></div><span style="flex:1;font-weight:600;color:#2C2C2A;font-size:0.9rem">${s.type==='reward'?'Belohnungsfeld':s.type==='free'?'Frei':s.text}</span><span style="font-size:0.75rem;color:#888780">${s.type==='player'?(players[s.owner]?.name||''):''} x${s.size.toFixed(1)}</span></div>`).join('');
+  document.getElementById('segList').innerHTML=segments.map(s=>`<div class="seg-item"><div class="dot" style="background:${s.type==='reward'?'#BA7517':s.type==='free'?'#888780':s.color}"></div><span style="flex:1;font-weight:600;color:#2C2C2A;font-size:0.9rem">${s.type==='reward'?'Belohnungsfeld':s.type==='free'?'Frei':s.text}</span><span style="font-size:0.75rem;color:#888780">${s.type==='player'?(players[s.owner]?.name||''):''} x${s.size.toFixed(1)}</span></div>`).join('');
   go('s-segs');
 });
-
 function addPlayer(){const inp=document.getElementById('nameInp');const name=inp.value.trim();if(!name||players.length>=8)return;if(players.find(p=>p.name===name)){toast('Name bereits vergeben');return;}players.push({name,color:PCOLORS[players.length]});inp.value='';renderPList();document.getElementById('startBtn').disabled=players.length<2;}
 function removeP(i){players.splice(i,1);players.forEach((p,idx)=>p.color=PCOLORS[idx]);renderPList();document.getElementById('startBtn').disabled=players.length<2;}
 function renderPList(){document.getElementById('playerList').innerHTML=players.map((p,i)=>`<div class="chip" style="background:${p.color}18;border:1.5px solid ${p.color}55"><div class="dot" style="background:${p.color}"></div><span style="flex:1;font-weight:700;color:#2C2C2A">${p.name}</span><button onclick="removeP(${i})" style="background:none;border:none;color:#888780;cursor:pointer;font-size:1.1rem">x</button></div>`).join('');}
 
-function startGame(){initSegs();chOrder=shuffleArr([...CHALLENGES]);chIdx=0;firstSpinPlayer=rnd(players.length);spinPlayer=firstSpinPlayer;showChMenu();}
+function startGame(){
+  initSegs();
+  chOrder=shuffleArr([...ALL_CHALLENGES]).slice(0,5);
+  chIdx=0;
+  spinPlayer=rnd(players.length);
+  showChMenu();
+}
 function initSegs(){segments=[];for(let i=0;i<9;i++){if(i===4)segments.push({type:'reward',text:'Belohnungsfeld',size:1,owner:null,color:'#BA7517',hits:0});else segments.push({type:'free',text:'',size:1,owner:null,color:'#D3D1C7',hits:0});}}
 
 function showChMenu(){
   if(chIdx>=5){go('s-wheel');drawWheel();updateCurrentPlayerBanner();return;}
   document.getElementById('progRow').innerHTML=Array.from({length:5},(_,i)=>`<div class="pdot ${i<chIdx?'done':i===chIdx?'active':''}"></div>`).join('');
-  const type=chOrder[chIdx];const emoji={hot:'🃏',roulette:'🔫',ts:'⏱️',bid:'💰',flu:'✂️'}[type];
-  const cs=players[chIdx%players.length];
-  document.getElementById('chInfo').innerHTML=`<div style="font-size:3rem;margin-bottom:0.5rem">${emoji}</div><div style="font-size:1.4rem;font-weight:800;color:#2C2C2A;margin-bottom:0.3rem">${CHNAMES[type]}</div><div style="color:#888780;font-size:0.85rem;margin-bottom:0.75rem">Runde ${chIdx+1} von 5</div><div style="display:inline-flex;align-items:center;gap:8px;background:${cs.color}18;border:1.5px solid ${cs.color}55;border-radius:10px;padding:0.5rem 1rem"><div class="dot" style="background:${cs.color}"></div><span style="font-weight:700;color:#2C2C2A">${cs.name} beginnt</span></div>`;
+  const type=chOrder[chIdx];const cs=players[chIdx%players.length];
+  document.getElementById('chInfo').innerHTML=`<div style="font-size:3rem;margin-bottom:0.5rem">${CHEMOJI[type]}</div><div style="font-size:1.4rem;font-weight:800;color:#2C2C2A;margin-bottom:0.3rem">${CHNAMES[type]}</div><div style="color:#888780;font-size:0.85rem;margin-bottom:0.75rem">Runde ${chIdx+1} von 5</div><div style="display:inline-flex;align-items:center;gap:8px;background:${cs.color}18;border:1.5px solid ${cs.color}55;border-radius:10px;padding:0.5rem 1rem"><div class="dot" style="background:${cs.color}"></div><span style="font-weight:700;color:#2C2C2A">${cs.name} beginnt</span></div>`;
   go('s-chmenu');
 }
-function launchChallenge(){const t=chOrder[chIdx];const si=chIdx%players.length;if(t==='hot')initHot(si);else if(t==='roulette')initRoulette(si);else if(t==='ts')initTs(si);else if(t==='bid')initBid();else initFlu();}
+function launchChallenge(){
+  const t=chOrder[chIdx];const si=chIdx%players.length;
+  if(t==='hot')initHot(si);
+  else if(t==='roulette')initRoulette(si);
+  else if(t==='ts')initTs(si);
+  else if(t==='bid')initBid();
+  else if(t==='flu')initFlu();
+  else if(t==='memory')initMemory();
+  else if(t==='money')initMoney();
+  else if(t==='addup')initAdd();
+  else if(t==='countup')initCountup();
+}
 
+/* ═══ CHALLENGE WON ═══ */
+function challengeWon(pIdx){
+  winnerPIdx=pIdx;const p=players[pIdx];
+  document.getElementById('winName').textContent=p.name;document.getElementById('winName').style.color=p.color;
+  document.getElementById('fieldTxt').value='';document.getElementById('randomCardWrap').style.display='none';document.getElementById('randomNextBtn').style.display='none';
+  ftSec=60;const lbl=document.getElementById('fieldTimerLabel');lbl.textContent='60s';lbl.className='timer-mini';
+  if(ftInt)clearInterval(ftInt);
+  ftInt=setInterval(()=>{ftSec--;lbl.textContent=ftSec+'s';if(ftSec<=10)lbl.className='timer-mini danger';if(ftSec<=0){clearInterval(ftInt);penaltyField();}},1000);
+  go('s-winner');
+}
+function penaltyField(){toast(players[winnerPIdx].name+' hat nicht eingetragen!',3000);chIdx++;showChMenu();}
+function confirmField(){const t=document.getElementById('fieldTxt').value.trim();if(!t){toast('Bitte etwas eintragen!');return;}if(ftInt)clearInterval(ftInt);const fi=segments.findIndex(s=>s.type==='free'&&s.text==='');if(fi>=0)segments[fi]={type:'player',text:t,size:1,owner:winnerPIdx,color:players[winnerPIdx].color,hits:0};chIdx++;if(chIdx>=5){go('s-wheel');drawWheel();updateCurrentPlayerBanner();}else showChMenu();}
+
+/* ═══ HOEHER TIEFER ═══ */
 function initHot(si){hotAlive=players.map((_,i)=>i);while(hotAlive[0]!==si)hotAlive.push(hotAlive.shift());hotPIdx=0;hotVal=rnd(11);document.getElementById('hotCard').textContent=hotVal;renderHotP();document.getElementById('hotStatus').textContent=players[hotAlive[hotPIdx]].name+' ist dran';go('s-hot');}
 function renderHotP(){document.getElementById('hotPlayers').innerHTML=hotAlive.map(i=>`<div class="chip" style="background:${players[i].color}18;border:1.5px solid ${i===hotAlive[hotPIdx]?players[i].color:players[i].color+'44'}"><div class="dot" style="background:${players[i].color}"></div><span style="font-weight:700;color:#2C2C2A">${players[i].name}</span></div>`).join('');}
 function hotGuess(dir){
-  const nv=rnd(11);const prev=hotVal;let ok=dir==='higher'?nv>hotVal:dir==='lower'?nv<hotVal:nv===hotVal;
+  const nv=rnd(11);const prev=hotVal;const ok=dir==='higher'?nv>hotVal:dir==='lower'?nv<hotVal:nv===hotVal;
   hotVal=nv;document.getElementById('hotCard').textContent=nv;
   if(!ok){const wrap=document.getElementById('hotCardWrap');wrap.classList.remove('hot-card-wrong');void wrap.offsetWidth;wrap.classList.add('hot-card-wrong');const ov=document.getElementById('hotOverlay');ov.classList.add('show');setTimeout(()=>ov.classList.remove('show'),400);const nm=players[hotAlive[hotPIdx]].name;hotAlive.splice(hotPIdx,1);toast(nv+' (war '+prev+') – falsch! '+nm+' trinkt!',3000);}
-  else{toast(dir==='equal'?nv+' – GLEICH! Perfekt!':nv+' – richtig!');hotPIdx=(hotPIdx+1)%hotAlive.length;}
+  else{toast(dir==='equal'?nv+' – GLEICH!':nv+' – richtig!');hotPIdx=(hotPIdx+1)%hotAlive.length;}
   if(hotAlive.length===1){setTimeout(()=>challengeWon(hotAlive[0]),800);return;}
-  if(hotAlive.length===0){toast('Unentschieden!');initHot(chIdx%players.length);return;}
+  if(hotAlive.length===0){initHot(chIdx%players.length);return;}
   hotPIdx=hotPIdx%hotAlive.length;renderHotP();document.getElementById('hotStatus').textContent=players[hotAlive[hotPIdx]].name+' ist dran';
 }
 
+/* ═══ ROULETTE ═══ */
 function initRoulette(si){rAlive=players.map((_,i)=>i);while(rAlive[0]!==si)rAlive.push(rAlive.shift());rPIdx=0;newRouletteRound();go('s-roulette');}
 function newRouletteRound(){rBangPos=rnd(6);rShotCount=0;renderBullets();renderRP();document.getElementById('rMsg').innerHTML='';document.getElementById('rStatus').textContent=players[rAlive[rPIdx]].name+' ist dran';document.getElementById('shootBtn').disabled=false;document.getElementById('gunWrap').classList.remove('recoil');}
 function renderBullets(){document.getElementById('bulletTrack').innerHTML=Array.from({length:6},(_,i)=>{if(i>=rShotCount)return`<div class="bullet">${i+1}</div>`;const bang=(i===rBangPos);return`<div class="bullet ${bang?'fired-bang':'fired-safe'}">${bang?'X':'V'}</div>`;}).join('');}
@@ -348,11 +595,12 @@ function spawnSmoke(){const wrap=document.getElementById('gunWrap');for(let i=0;
 function shoot(){
   if(rShotCount>=6)return;document.getElementById('shootBtn').disabled=true;const isBang=(rShotCount===rBangPos);document.getElementById('gunWrap').classList.add('recoil');setTimeout(()=>document.getElementById('gunWrap').classList.remove('recoil'),250);spawnSmoke();rShotCount++;renderBullets();
   if(isBang){doFlash();const out=rAlive[rPIdx];document.getElementById('rMsg').innerHTML='<div class="bang-msg">BANG! 💥</div>';document.getElementById('rStatus').textContent=players[out].name+' trinkt!';toast(players[out].name+' ist raus!',3000);rAlive.splice(rPIdx,1);if(rAlive.length===1){setTimeout(()=>challengeWon(rAlive[0]),1800);}else if(rAlive.length===0){setTimeout(()=>initRoulette(chIdx%players.length),1800);}else{rPIdx=rPIdx%rAlive.length;setTimeout(()=>newRouletteRound(),2200);}}
-  else{document.getElementById('rMsg').innerHTML='<div class="safe-msg">Klick... sicher!</div>';if(rShotCount>=6){rPIdx=(rPIdx+1)%rAlive.length;document.getElementById('rStatus').textContent='Niemand getroffen – neue Runde!';setTimeout(()=>newRouletteRound(),1500);}else{rPIdx=(rPIdx+1)%rAlive.length;setTimeout(()=>{document.getElementById('rMsg').innerHTML='';renderRP();document.getElementById('rStatus').textContent=players[rAlive[rPIdx]].name+' ist dran';document.getElementById('shootBtn').disabled=false;},900);}}
+  else{document.getElementById('rMsg').innerHTML='<div class="safe-msg">Klick... sicher!</div>';if(rShotCount>=6){rPIdx=(rPIdx+1)%rAlive.length;setTimeout(()=>newRouletteRound(),1500);}else{rPIdx=(rPIdx+1)%rAlive.length;setTimeout(()=>{document.getElementById('rMsg').innerHTML='';renderRP();document.getElementById('rStatus').textContent=players[rAlive[rPIdx]].name+' ist dran';document.getElementById('shootBtn').disabled=false;},900);}}
 }
 function renderRP(){document.getElementById('rPlayers').innerHTML=rAlive.map(i=>`<div class="chip" style="background:${players[i].color}18;border:1.5px solid ${i===rAlive[rPIdx]?players[i].color:players[i].color+'44'}"><div class="dot" style="background:${players[i].color}"></div><span style="font-weight:700;color:#2C2C2A">${players[i].name}</span></div>`).join('');}
 
-function initTs(si){tsTarget=+(Math.random()*7+2).toFixed(2);tsTimes=[];tsCount=0;tsStartIdx=si;tsPIdx=si;tsRunning=false;document.getElementById('tsTarget').textContent=tsTarget.toFixed(2)+'s';document.getElementById('tsBtn').textContent='START';document.getElementById('tsBtn').onclick=tsAction;document.getElementById('tsResults').innerHTML='';renderTsArea();updateTsP();go('s-ts');}
+/* ═══ TIME STOP ═══ */
+function initTs(si){tsTarget=+(Math.random()*7+2).toFixed(2);tsTimes=[];tsCount=0;tsPIdx=si;tsRunning=false;document.getElementById('tsTarget').textContent=tsTarget.toFixed(2)+'s';document.getElementById('tsBtn').textContent='START';document.getElementById('tsBtn').onclick=tsAction;document.getElementById('tsResults').innerHTML='';renderTsArea();updateTsP();go('s-ts');}
 function renderTsArea(){document.getElementById('tsArea').innerHTML=`<div class="ts-cover"><div style="font-size:0.85rem;color:#888780;margin-bottom:0.5rem">Deine Zeit wird verdeckt</div><div style="font-size:2.5rem">🙈</div></div>`;}
 function updateTsP(){const p=players[tsPIdx%players.length];document.getElementById('tsCurrent').innerHTML=`<div style="display:inline-flex;align-items:center;gap:8px;background:${p.color}18;border:1.5px solid ${p.color}55;border-radius:10px;padding:0.4rem 1rem"><div class="dot" style="background:${p.color}"></div><span>${p.name} ist dran</span></div>`;}
 function tsAction(){
@@ -362,6 +610,7 @@ function tsAction(){
 }
 function showTsResults(){tsTimes.sort((a,b)=>a.d-b.d);const w=tsTimes[0].p;document.getElementById('tsCurrent').textContent='Ergebnis';document.getElementById('tsArea').innerHTML='';document.getElementById('tsResults').innerHTML=tsTimes.map((r,i)=>{const p=players[r.p];const dc=r.d<0.3?'diff-great':r.d<1?'diff-ok':'diff-bad';return`<div class="result-row"><div style="display:flex;align-items:center"><div class="dot" style="background:${p.color};margin-right:8px"></div><span style="font-weight:700;color:#2C2C2A">${p.name}</span>${i===0?'<span class="winner-pill">Sieger</span>':''}</div><div style="display:flex;align-items:center;gap:6px"><span style="font-family:monospace;font-weight:700;color:#2C2C2A">${r.t.toFixed(2)}s</span><span class="${dc}">+-${r.d.toFixed(2)}s</span></div></div>`;}).join('');const btn=document.getElementById('tsBtn');btn.textContent='Weiter';btn.onclick=()=>challengeWon(w);}
 
+/* ═══ BID ═══ */
 function initBid(){bid={ps:players.map((_,i)=>({idx:i,status:'active',highest:null})),cur:'',turnPos:chIdx%players.length};renderBid();go('s-bid');}
 function bidActives(){return bid.ps.filter(p=>p.status==='active');}
 function bidCurrent(){const a=bidActives();return a[bid.turnPos%a.length];}
@@ -372,58 +621,538 @@ function bReject(){const d=document.getElementById('bidDisp');if(!d)return;d.cla
 function bConfirm(){const v=parseInt(bid.cur||'0');if(!v||v<=0){bReject();return;}const gm=bidGlobalMax();const cur=bidCurrent();if(v<=gm||v<=(cur.highest||0)){bReject();return;}cur.highest=v;bid.cur='';bid.turnPos++;const actives=bidActives();if(actives.length===1){setTimeout(()=>challengeWon(actives[0].idx),300);return;}bid.turnPos=bid.turnPos%actives.length;renderBid();}
 function bFold(){const cur=bidCurrent();cur.status='folded';toast(players[cur.idx].name+' steigt aus!');bid.cur='';const actives=bidActives();if(actives.length===1){setTimeout(()=>challengeWon(actives[0].idx),400);return;}bid.turnPos=bid.turnPos%actives.length;renderBid();}
 
+/* ═══ FLI FLA FLU ═══ */
 function initFlu(){fluAlive=players.map((_,i)=>i);renderFluBtns();go('s-flu');}
 function renderFluBtns(){document.getElementById('fluPlayerBtns').innerHTML=fluAlive.map(i=>`<div style="display:flex;gap:8px;margin-bottom:8px;width:100%"><div style="flex:1;display:flex;align-items:center;gap:10px;padding:0.85rem 1rem;background:${players[i].color}18;border:1.5px solid ${players[i].color}55;border-radius:12px;font-weight:700;color:#2C2C2A"><div class="dot" style="background:${players[i].color}"></div>${players[i].name}</div><button onclick="fluMarkWinner(${i})" style="padding:0.85rem 0.9rem;background:#E1F5EE;border:1.5px solid #1D9E75;border-radius:12px;font-size:0.8rem;font-weight:700;color:#085041;cursor:pointer;white-space:nowrap">Sieger</button><button onclick="fluEliminate(${i})" style="padding:0.85rem 0.9rem;background:#FCEBEB;border:1.5px solid #E24B4A;border-radius:12px;font-size:0.8rem;font-weight:700;color:#791F1F;cursor:pointer;white-space:nowrap">Aus</button></div>`).join('');}
-function fluEliminate(i){fluAlive=fluAlive.filter(x=>x!==i);if(fluAlive.length===1){challengeWon(fluAlive[0]);return;}if(fluAlive.length===0){toast('Unentschieden!');initFlu();return;}renderFluBtns();}
+function fluEliminate(i){fluAlive=fluAlive.filter(x=>x!==i);if(fluAlive.length===1){challengeWon(fluAlive[0]);return;}if(fluAlive.length===0){initFlu();return;}renderFluBtns();}
 function fluMarkWinner(i){challengeWon(i);}
 
+/* ═══════════════════════════════════════
+   MEMORY
+═══════════════════════════════════════ */
+let memCards=[],memFlipped=[],memLocked=false,memScores={},memCurPlayer=0,memPairs=0;
+
+function initMemory(){
+  // 13 Paare = 26 Karten, ungerade Anzahl garantiert immer einen Gewinner
+  const picked=shuffleArr([...MEM_EMOJIS]).slice(0,13);
+  const deck=shuffleArr([...picked,...picked]);
+  memCards=deck.map((e,i)=>({id:i,emoji:e,flipped:false,matched:false}));
+  memFlipped=[];memLocked=false;memPairs=0;
+  memScores={};players.forEach((_,i)=>memScores[i]=0);
+  memCurPlayer=rnd(players.length);
+  renderMemory();
+  go('s-memory');
+}
+
+function renderMemory(){
+  // Scoreboard
+  document.getElementById('memScoreboard').innerHTML=players.map((p,i)=>`<div class="mem-score-chip" style="border-color:${p.color}55"><div class="mem-score-name" style="color:${p.color}">${p.name}</div><div class="mem-score-val" style="color:${p.color}">${memScores[i]}</div></div>`).join('');
+  // Turn banner
+  const cp=players[memCurPlayer];
+  document.getElementById('memTurnBanner').innerHTML=`<span style="color:${cp.color};font-weight:800">${cp.name}</span> ist dran`;
+  document.getElementById('memTurnBanner').style.background=cp.color+'15';
+  document.getElementById('memTurnBanner').style.borderColor=cp.color+'55';
+  // Board: 26 Karten in 5 Spalten (Karten sind kleiner)
+  const board=document.getElementById('memBoard');
+  board.style.gridTemplateColumns='repeat(5,1fr)';
+  board.innerHTML=memCards.map((c,i)=>{
+    let cls='mem-card';if(c.flipped)cls+=' flipped';if(c.matched)cls+=' matched';
+    const show=c.flipped||c.matched;
+    return`<div class="${cls}" id="mc${i}" onclick="memFlip(${i})" style="font-size:1.2rem">${show?c.emoji:'🂠'}</div>`;
+  }).join('');
+  document.getElementById('memStatus').textContent='';
+}
+
+function memFlip(i){
+  if(memLocked)return;
+  const c=memCards[i];
+  if(c.flipped||c.matched)return;
+  if(memFlipped.length>=2)return;
+  c.flipped=true;memFlipped.push(i);
+  const el=document.getElementById('mc'+i);
+  if(el){el.textContent=c.emoji;el.classList.add('flipped');}
+  if(memFlipped.length===2){
+    memLocked=true;
+    const [a,b]=memFlipped;
+    if(memCards[a].emoji===memCards[b].emoji){
+      // Match!
+      setTimeout(()=>{
+        memCards[a].matched=true;memCards[b].matched=true;
+        memCards[a].flipped=false;memCards[b].flipped=false;
+        memScores[memCurPlayer]++;memPairs++;
+        memFlipped=[];memLocked=false;
+        if(memPairs>=13){setTimeout(()=>memGameOver(),400);return;}
+        renderMemory();
+        document.getElementById('memStatus').textContent='✅ Treffer! Nochmal!';
+      },700);
+    } else {
+      // No match
+      const elA=document.getElementById('mc'+a);const elB=document.getElementById('mc'+b);
+      if(elA)elA.classList.add('wrong');if(elB)elB.classList.add('wrong');
+      setTimeout(()=>{
+        memCards[a].flipped=false;memCards[b].flipped=false;
+        memFlipped=[];memLocked=false;
+        memCurPlayer=(memCurPlayer+1)%players.length;
+        renderMemory();
+      },900);
+    }
+  }
+}
+
+function memGameOver(){
+  // Find winner (most pairs)
+  let maxScore=0;players.forEach((_,i)=>{if(memScores[i]>maxScore)maxScore=memScores[i];});
+  const winners=players.map((_,i)=>i).filter(i=>memScores[i]===maxScore);
+  if(winners.length===1){challengeWon(winners[0]);}
+  else{
+    // Tie – show result, let them pick via fli fla flu style
+    const board=document.getElementById('memBoard');
+    board.innerHTML='';
+    document.getElementById('memTurnBanner').innerHTML='🤝 Gleichstand! Stechen:';
+    document.getElementById('memScoreboard').innerHTML=winners.map(i=>`<div style="display:flex;gap:8px;margin-bottom:8px;width:100%;max-width:380px"><div style="flex:1;display:flex;align-items:center;gap:10px;padding:0.85rem 1rem;background:${players[i].color}18;border:1.5px solid ${players[i].color}55;border-radius:12px;font-weight:700;color:#2C2C2A"><div class="dot" style="background:${players[i].color}"></div>${players[i].name} (${memScores[i]} Paare)</div><button onclick="challengeWon(${i})" style="padding:0.85rem 0.9rem;background:#E1F5EE;border:1.5px solid #1D9E75;border-radius:12px;font-size:0.8rem;font-weight:700;color:#085041;cursor:pointer">Sieger</button></div>`).join('');
+  }
+}
+
+/* ═══════════════════════════════════════
+   GELD ZAEHLEN
+═══════════════════════════════════════ */
+let moneyAmount=0,moneyCoinList=[],moneyAnswers={},moneyCurPidx=0,moneyTimerInt=null;
+let moneyDigits=['0','0','0','0'],moneyActiveDigit=0;
+
+/* Generate 18-20 coins, max 19.99€ */
+function randMoney(){
+  const coinVals=[1,2,5,10,20,50,100,200];
+  const targetCount=18+rnd(3); // 18,19,20 Münzen
+  let coins=[],total=0;
+  // Pick coins randomly ensuring we don't exceed 1999 cents
+  for(let i=0;i<targetCount;i++){
+    const maxVal=Math.min(200,1999-total-(targetCount-1-i));
+    const possible=coinVals.filter(v=>v<=Math.max(1,maxVal));
+    if(!possible.length)break;
+    const v=possible[rnd(possible.length)];
+    coins.push(v);total+=v;
+    if(total>=1999)break;
+  }
+  // Pad to targetCount with 1ct if needed
+  while(coins.length<targetCount&&total<1999){coins.push(1);total++;}
+  return{total,coins:shuffleArr(coins)};
+}
+
+function renderCoins(coins){
+  return coins.map(v=>{
+    const cd=COINS.find(c=>c.v===v)||COINS[0];
+    const sz=cd.size;
+    const inner=cd.inner
+      ?`<div style="width:${sz*0.55}px;height:${sz*0.55}px;border-radius:50%;background:${cd.inner};position:absolute;display:flex;align-items:center;justify-content:center"><span style="font-size:${sz*0.28}px;font-weight:800;color:#fff">${cd.label}</span></div>`
+      :'';
+    return`<div class="coin" style="width:${sz}px;height:${sz}px;background:${cd.bg};border-color:${cd.border};box-shadow:inset 0 2px 0 ${cd.stroke},0 2px 4px rgba(0,0,0,0.3);position:relative;align-items:center;justify-content:center">
+      ${inner||`<span style="font-size:${sz*0.28}px;font-weight:800;color:${cd.textColor}">${cd.label}</span>`}
+    </div>`;
+  }).join('');
+}
+
+function initMoney(){
+  const{total,coins}=randMoney();
+  moneyAmount=total;moneyCoinList=coins;
+  moneyAnswers={};
+  moneyCurPidx=rnd(players.length);
+  moneyShowCover();
+}
+
+function moneyShowCover(){
+  const p=players[moneyCurPidx];
+  const answered=Object.keys(moneyAnswers).length;
+  document.getElementById('moneyCoverProgress').textContent='Spieler '+(answered+1)+' von '+players.length;
+  document.getElementById('moneyCoverName').textContent=p.name;
+  document.getElementById('moneyCoverName').style.color=p.color;
+  document.getElementById('moneyCoverDot').style.background=p.color;
+  const banner=document.getElementById('moneyCoverBanner');
+  banner.style.background=p.color+'15';banner.style.borderColor=p.color+'55';
+  go('s-money-cover');
+}
+
+function moneyStartTimer(){
+  const p=players[moneyCurPidx];
+  document.getElementById('moneyEqPlayerTag').textContent=p.name+' – Münzen zählen!';
+  document.getElementById('moneyCoinDisplay').innerHTML=renderCoins(moneyCoinList);
+  const circ=2*Math.PI*46;
+  const ring=document.getElementById('moneyTimerRing');
+  const txt=document.getElementById('moneyTimerText');
+  ring.style.strokeDasharray=circ;
+  ring.style.strokeDashoffset=0;
+  ring.style.stroke='#BA7517';
+  txt.textContent='12';txt.style.color='#633806';
+  if(moneyTimerInt)clearInterval(moneyTimerInt);
+  const total=12000,t0=Date.now();
+  go('s-money-eq');
+  moneyTimerInt=setInterval(()=>{
+    const elapsed=Date.now()-t0;
+    const frac=Math.min(elapsed/total,1);
+    const rem=Math.max(0,Math.ceil((total-elapsed)/1000));
+    ring.style.strokeDashoffset=circ*frac;
+    txt.textContent=rem;
+    if(rem<=3){ring.style.stroke='#E24B4A';txt.style.color='#E24B4A';}
+    if(frac>=1){clearInterval(moneyTimerInt);moneyShowInput();}
+  },50);
+}
+
+function moneyShowInput(){
+  moneyDigits=['0','0','0','0'];moneyActiveDigit=0;
+  const p=players[moneyCurPidx];
+  document.getElementById('moneyInputName').textContent=p.name;
+  document.getElementById('moneyInputDot').style.background=p.color;
+  const banner=document.getElementById('moneyInputBanner');
+  banner.style.background=p.color+'15';banner.style.borderColor=p.color+'55';
+  moneyUpdateDisplay();
+  go('s-money-input');
+}
+
+function moneyUpdateDisplay(){
+  ['med0','med1','med2','med3'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.textContent=moneyDigits[i];
+    el.className='euro-digit'+(i===moneyActiveDigit?' active':'');
+  });
+}
+
+function moneyInputDigit(v){
+  if(v==='ok'){moneyConfirm();return;}
+  if(v==='del'){
+    if(moneyActiveDigit>0)moneyActiveDigit--;
+    moneyDigits[moneyActiveDigit]='0';
+  } else {
+    moneyDigits[moneyActiveDigit]=String(v);
+    if(moneyActiveDigit<3)moneyActiveDigit++;
+  }
+  moneyUpdateDisplay();
+}
+
+function moneyConfirm(){
+  const euros=parseInt(moneyDigits[0]+moneyDigits[1]);
+  const cents=parseInt(moneyDigits[2]+moneyDigits[3]);
+  const totalCents=euros*100+cents;
+  moneyAnswers[moneyCurPidx]={val:totalCents,diff:Math.abs(totalCents-moneyAmount)};
+  const answered=Object.keys(moneyAnswers).length;
+  if(answered>=players.length){moneyShowResults();return;}
+  moneyCurPidx=(moneyCurPidx+1)%players.length;
+  while(moneyAnswers[moneyCurPidx]!==undefined)moneyCurPidx=(moneyCurPidx+1)%players.length;
+  moneyShowCover();
+}
+
+function moneyShowResults(){
+  const sorted=players.map((p,i)=>({
+    i,p,
+    val:moneyAnswers[i]!==undefined?moneyAnswers[i].val:null,
+    diff:moneyAnswers[i]!==undefined?moneyAnswers[i].diff:9999
+  })).sort((a,b)=>a.diff-b.diff);
+  const euros=Math.floor(moneyAmount/100),cents=moneyAmount%100;
+  const winners=sorted.filter(r=>r.diff===sorted[0].diff);
+
+  // Reuse s-money-input as result screen
+  const inputBanner=document.getElementById('moneyInputBanner');
+  inputBanner.style.display='none';
+  document.getElementById('moneyInputDisp').style.display='none';
+  // Remove numpad (it's static, hide via parent)
+  const numpad=document.querySelector('#s-money-input .num-pad');
+  if(numpad)numpad.style.display='none';
+
+  let existing=document.getElementById('moneyResultDiv');
+  if(existing)existing.remove();
+  const div=document.createElement('div');
+  div.id='moneyResultDiv';
+  div.style.cssText='width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center';
+  div.innerHTML=
+    '<div class="badge" style="background:#FAEEDA;color:#633806;margin-bottom:0.75rem">Ergebnis</div>'+
+    '<div style="background:#fff;border:1.5px solid #CECBF6;border-radius:14px;padding:0.75rem 1rem;width:100%;text-align:center;margin-bottom:0.75rem">'+
+      '<div style="font-size:0.75rem;color:#888780;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.3rem">Richtiger Betrag</div>'+
+      '<div style="font-size:2rem;font-weight:800;color:#1D9E75">'+(euros)+','+(cents.toString().padStart(2,'0'))+' €</div>'+
+      '<div style="margin-top:0.5rem">'+(()=>{
+        // Show coins compact
+        return`<div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center">${renderCoins(moneyCoinList)}</div>`;
+      })()+'</div>'+
+    '</div>'+
+    sorted.map((r,i)=>{
+      const dc=r.diff===0?'diff-great':r.diff<20?'diff-ok':'diff-bad';
+      const pEuros=r.val!==null?Math.floor(r.val/100):null;
+      const pCents=r.val!==null?r.val%100:null;
+      const valStr=r.val!==null?(pEuros+','+(pCents.toString().padStart(2,'0'))+'€'):'–';
+      return`<div class="result-row">
+        <div style="display:flex;align-items:center">
+          <div class="dot" style="background:${r.p.color};margin-right:8px"></div>
+          <span style="font-weight:700;color:#2C2C2A">${r.p.name}</span>
+          ${i===0?'<span class="winner-pill">Sieger</span>':''}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-family:monospace;font-weight:700;color:#2C2C2A">${valStr}</span>
+          <span class="${dc}">±${r.diff===9999?'–':r.diff+'¢'}</span>
+        </div>
+      </div>`;
+    }).join('')+
+    (winners.length>1
+      ? '<div style="font-size:0.85rem;font-weight:700;color:#888780;text-align:center;margin-top:0.75rem">Gleichstand – Sieger wählen:</div>'+
+        winners.map(r=>`<button class="btn btn-success" style="margin-top:0.4rem" onclick="challengeWon(${r.i})">${r.p.name}</button>`).join('')
+      : `<button class="btn btn-primary" style="margin-top:0.75rem;width:100%;max-width:380px" onclick="challengeWon(${sorted[0].i})">Weiter</button>`);
+
+  document.getElementById('s-money-input').appendChild(div);
+  go('s-money-input');
+}
+
+
+/* ═══════════════════════════════════════
+   ADDIEREN
+═══════════════════════════════════════ */
+/* ═══════════════════════════════════════
+   ADDIEREN
+═══════════════════════════════════════ */
+let addNums=[],addAnswer=0,addAnswers={},addCurPidx=0,addTimerInt=null,addInputRaw='',addInputNeg=false;
+
+function genAddEquation(){
+  const count=12+rnd(3); // 12-14 Komponenten
+  const nums=Array.from({length:count},()=>{
+    const neg=Math.random()<0.3;
+    return(1+rnd(19))*(neg?-1:1);
+  });
+  return{nums,answer:nums.reduce((a,b)=>a+b,0)};
+}
+function addEqHTML(nums){
+  return nums.map((n,i)=>{
+    const col=n<0?'#E24B4A':'#534AB7';
+    if(i===0)return`<span style="color:${col};font-weight:800">${n}</span>`;
+    const op=n<0?'−':'+';
+    return`<span style="color:#888780"> ${op} </span><span style="color:${col};font-weight:800">${Math.abs(n)}</span>`;
+  }).join('');
+}
+
+function initAdd(){
+  const eq=genAddEquation();
+  addNums=eq.nums;addAnswer=eq.answer;
+  addAnswers={};
+  addCurPidx=rnd(players.length);
+  addShowCover();
+}
+
+function addShowCover(){
+  const p=players[addCurPidx];
+  const answered=Object.keys(addAnswers).length;
+  document.getElementById('addCoverProgress').textContent='Spieler '+(answered+1)+' von '+players.length;
+  document.getElementById('addCoverName').textContent=p.name;
+  document.getElementById('addCoverName').style.color=p.color;
+  document.getElementById('addCoverDot').style.background=p.color;
+  const banner=document.getElementById('addCoverBanner');
+  banner.style.background=p.color+'15';banner.style.borderColor=p.color+'55';
+  go('s-add-cover');
+}
+
+function addStartTimer(){
+  const p=players[addCurPidx];
+  document.getElementById('addEqPlayerTag').textContent=p.name+' – Gleichung merken!';
+  document.getElementById('addEqDisplay').innerHTML=addEqHTML(addNums)+'<span style="color:#888780"> = ?</span>';
+  const circ=2*Math.PI*46;
+  const ring=document.getElementById('addTimerRing');
+  const txt=document.getElementById('addTimerText');
+  ring.style.strokeDasharray=circ;
+  ring.style.strokeDashoffset=0;
+  ring.style.stroke='#7F77DD';
+  txt.textContent='12';txt.style.color='#3C3489';
+  if(addTimerInt)clearInterval(addTimerInt);
+  const total=12000,t0=Date.now();
+  go('s-add-eq');
+  addTimerInt=setInterval(()=>{
+    const elapsed=Date.now()-t0;
+    const frac=Math.min(elapsed/total,1);
+    const rem=Math.max(0,Math.ceil((total-elapsed)/1000));
+    ring.style.strokeDashoffset=circ*frac;
+    txt.textContent=rem;
+    if(rem<=3){ring.style.stroke='#E24B4A';txt.style.color='#E24B4A';}
+    if(frac>=1){clearInterval(addTimerInt);addShowInput();}
+  },50);
+}
+
+function addShowInput(){
+  addInputRaw='';addInputNeg=false;
+  const p=players[addCurPidx];
+  document.getElementById('addInputName').textContent=p.name;
+  document.getElementById('addInputDot').style.background=p.color;
+  const banner=document.getElementById('addInputBanner');
+  banner.style.background=p.color+'15';banner.style.borderColor=p.color+'55';
+  document.getElementById('addInputDisp').textContent='?';
+  go('s-add-input');
+}
+
+function addInputDigit(v){
+  if(v==='neg'){addInputNeg=!addInputNeg;}
+  else if(v==='del'){addInputRaw=addInputRaw.slice(0,-1);}
+  else{if(addInputRaw.length<3)addInputRaw+=v;}
+  const show=(addInputNeg&&addInputRaw)?'-'+addInputRaw:(addInputRaw||'?');
+  document.getElementById('addInputDisp').textContent=show;
+}
+
+function addConfirm(){
+  const valStr=(addInputNeg&&addInputRaw)?'-'+addInputRaw:(addInputRaw||'0');
+  const val=parseInt(valStr)||0;
+  addAnswers[addCurPidx]=val;
+  const answered=Object.keys(addAnswers).length;
+  if(answered>=players.length){addShowResults();return;}
+  addCurPidx=(addCurPidx+1)%players.length;
+  while(addAnswers[addCurPidx]!==undefined)addCurPidx=(addCurPidx+1)%players.length;
+  addShowCover();
+}
+
+function addShowResults(){
+  const sorted=players.map((p,i)=>({
+    i,p,
+    val:addAnswers[i]!==undefined?addAnswers[i]:null,
+    diff:addAnswers[i]!==undefined?Math.abs(addAnswers[i]-addAnswer):9999
+  })).sort((a,b)=>a.diff-b.diff);
+  const winners=sorted.filter(r=>r.diff===sorted[0].diff);
+  // Render result into s-add-input (reuse as result screen)
+  document.getElementById('addInputBanner').style.cssText='display:none';
+  document.getElementById('addInputDot').style.display='none';
+  const disp=document.getElementById('addInputDisp');
+  disp.style.cssText='display:none';
+  // Build result HTML
+  const c=document.getElementById('s-add-input');
+  // Remove existing numpad and confirm btn if present (they're static HTML)
+  // Instead inject a result div
+  let existing=document.getElementById('addResultDiv');
+  if(existing)existing.remove();
+  const div=document.createElement('div');
+  div.id='addResultDiv';
+  div.style.cssText='width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center';
+  div.innerHTML=
+    '<div class="badge" style="background:#E1F5EE;color:#085041;margin-bottom:0.75rem">Ergebnis</div>'+
+    '<div style="background:#fff;border:1.5px solid #CECBF6;border-radius:14px;padding:1rem;width:100%;text-align:center;margin-bottom:0.75rem">'+
+      '<div style="font-size:0.75rem;color:#888780;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.4rem">Gleichung</div>'+
+      '<div style="font-size:0.9rem;line-height:2.2">'+addEqHTML(addNums)+'</div>'+
+      '<div style="margin-top:0.5rem;font-size:0.75rem;color:#888780;font-weight:700;text-transform:uppercase;letter-spacing:1px">Richtige Antwort</div>'+
+      '<div style="font-size:2rem;font-weight:800;color:#1D9E75">'+addAnswer+'</div>'+
+    '</div>'+
+    sorted.map((r,i)=>{
+      const dc=r.diff===0?'diff-great':r.diff<=3?'diff-ok':'diff-bad';
+      return`<div class="result-row">
+        <div style="display:flex;align-items:center">
+          <div class="dot" style="background:${r.p.color};margin-right:8px"></div>
+          <span style="font-weight:700;color:#2C2C2A">${r.p.name}</span>
+          ${i===0?'<span class="winner-pill">Sieger</span>':''}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-family:monospace;font-weight:700;color:#2C2C2A">${r.val!==null?r.val:'–'}</span>
+          <span class="${dc}">±${r.diff===9999?'–':r.diff}</span>
+        </div>
+      </div>`;
+    }).join('')+
+    (winners.length>1
+      ? '<div style="font-size:0.85rem;font-weight:700;color:#888780;text-align:center;margin-top:0.75rem">Gleichstand – Sieger wählen:</div>'+
+        winners.map(r=>`<button class="btn btn-success" style="margin-top:0.4rem" onclick="challengeWon(${r.i})">${r.p.name}</button>`).join('')
+      : `<button class="btn btn-primary" style="margin-top:0.75rem;width:100%;max-width:380px" onclick="challengeWon(${sorted[0].i})">Weiter</button>`);
+  c.appendChild(div);
+  go('s-add-input');
+}
+
+/* ═══════════════════════════════════════
+   HOCHZAEHLEN
+═══════════════════════════════════════ */
+let countTarget=0,countAlive=[],countPidx=0,countCurrent=0,countLog=[];
+
+function initCountup(){
+  const n=players.length;
+  if(n<=2)countTarget=20+rnd(10);
+  else if(n===3)countTarget=26+rnd(14);
+  else if(n===4)countTarget=32+rnd(18);
+  else countTarget=36+rnd(16);
+  countAlive=players.map((_,i)=>i);
+  countPidx=rnd(players.length)%countAlive.length;
+  countCurrent=0;countLog=[];
+  renderCountup();
+  go('s-count');
+}
+
+function renderCountup(){
+  const c=document.getElementById('countContent');
+  const cp=players[countAlive[countPidx%countAlive.length]];
+  c.innerHTML=`
+    <div class="count-target">Ziel: <strong style="color:#534AB7">${countTarget}</strong></div>
+    <div class="count-number">${countCurrent}</div>
+    <div class="count-log" id="countLog">${countLog.slice(-8).join(' · ')}</div>
+    <div style="background:${cp.color}15;border:2px solid ${cp.color}44;border-radius:12px;padding:0.75rem;width:100%;text-align:center;margin-bottom:0.75rem;display:flex;align-items:center;gap:8px;justify-content:center">
+      <div class="dot" style="background:${cp.color}"></div>
+      <span style="font-weight:800;color:${cp.color}">${cp.name}</span>
+      <span style="color:#888780;font-size:0.85rem">– max. 3 Zahlen</span>
+    </div>
+    <div style="display:flex;gap:8px;width:100%;margin-bottom:0.5rem">
+      <button class="btn btn-secondary" style="flex:1;font-size:0.95rem;padding:0.75rem" onclick="countSay(1)">+1</button>
+      <button class="btn btn-secondary" style="flex:1;font-size:0.95rem;padding:0.75rem" onclick="countSay(2)">+2</button>
+      <button class="btn btn-secondary" style="flex:1;font-size:0.95rem;padding:0.75rem" onclick="countSay(3)">+3</button>
+    </div>
+    <div style="font-size:0.8rem;color:#888780;text-align:center">Wer die Zielzahl nennen <em>muss</em> scheidet aus</div>
+    <div style="height:0.75rem"></div>
+    <div class="label">Noch im Spiel</div>
+    <div id="countAliveList" style="width:100%"></div>`;
+  renderCountAlive();
+}
+
+function renderCountAlive(){
+  const el=document.getElementById('countAliveList');if(!el)return;
+  el.innerHTML=countAlive.map((i,pos)=>`<div style="display:flex;gap:8px;margin-bottom:8px;width:100%"><div style="flex:1;display:flex;align-items:center;gap:10px;padding:0.7rem 1rem;background:${players[i].color}18;border:1.5px solid ${pos===countPidx%countAlive.length?players[i].color:players[i].color+'44'};border-radius:12px;font-weight:700;color:#2C2C2A"><div class="dot" style="background:${players[i].color}"></div>${players[i].name}</div><button onclick="countElim(${i})" style="padding:0.7rem 0.9rem;background:#FCEBEB;border:1.5px solid #E24B4A;border-radius:12px;font-size:0.8rem;font-weight:700;color:#791F1F;cursor:pointer">Aus</button></div>`).join('');
+}
+
+function countSay(n){
+  const newCount=countCurrent+n;
+  for(let i=countCurrent+1;i<=newCount;i++)countLog.push(i);
+  countCurrent=newCount;
+  if(countCurrent>=countTarget){
+    const outIdx=countAlive[countPidx%countAlive.length];
+    toast(players[outIdx].name+' hat '+countTarget+' gesagt – raus!',2500);
+    countElim(outIdx);return;
+  }
+  countPidx=(countPidx+1)%countAlive.length;
+  renderCountup();
+}
+
+function countElim(playerIdx){
+  countAlive=countAlive.filter(i=>i!==playerIdx);
+  if(countAlive.length===1){challengeWon(countAlive[0]);return;}
+  if(countAlive.length===0){initCountup();return;}
+  countPidx=countPidx%countAlive.length;countCurrent=0;countLog=[];
+  const n=countAlive.length;
+  countTarget=n<=2?20+rnd(10):n===3?26+rnd(14):n===4?32+rnd(18):36+rnd(16);
+  toast(players[playerIdx].name+' ist raus! Neue Runde.',2000);
+  renderCountup();
+}
+
+/* ═══ RANDOM TASKS ═══ */
 function getRandomTask(){let idx;do{idx=rnd(RANDOM_TASKS.length);}while(idx===lastRandomIdx&&RANDOM_TASKS.length>1);lastRandomIdx=idx;return RANDOM_TASKS[idx];}
 function randomizeField(){const task=getRandomTask();document.getElementById('fieldTxt').value=task;document.getElementById('randomCardText').textContent=task;document.getElementById('randomCardWrap').style.display='flex';document.getElementById('randomNextBtn').style.display='flex';}
 function randomizeFF(){const task=getRandomTask();document.getElementById('ffTxt').value=task;document.getElementById('ffRandomText').textContent=task;document.getElementById('ffRandomWrap').style.display='flex';document.getElementById('ffRandomNextBtn').style.display='flex';}
 function randomizeAddField(){const task=getRandomTask();document.getElementById('addFieldTxt').value=task;document.getElementById('addFieldRandomWrap').style.display='flex';document.getElementById('addFieldRandomWrap').innerHTML=`<div class="random-card-text">${task}</div>`;document.getElementById('addFieldNextBtn').style.display='flex';}
 
-function challengeWon(pIdx){
-  winnerPIdx=pIdx;const p=players[pIdx];document.getElementById('winName').textContent=p.name;document.getElementById('winName').style.color=p.color;
-  document.getElementById('fieldTxt').value='';document.getElementById('randomCardWrap').style.display='none';document.getElementById('randomNextBtn').style.display='none';
-  ftSec=60;const lbl=document.getElementById('fieldTimerLabel');lbl.textContent='60s';lbl.className='timer-mini';
-  if(ftInt)clearInterval(ftInt);
-  ftInt=setInterval(()=>{ftSec--;lbl.textContent=ftSec+'s';if(ftSec<=10)lbl.className='timer-mini danger';if(ftSec<=0){clearInterval(ftInt);penaltyField();}},1000);
-  go('s-winner');
-}
-function penaltyField(){toast(players[winnerPIdx].name+' hat nicht eingetragen!',3000);chIdx++;showChMenu();}
-function confirmField(){const t=document.getElementById('fieldTxt').value.trim();if(!t){toast('Bitte etwas eintragen!');return;}if(ftInt)clearInterval(ftInt);const fi=segments.findIndex(s=>s.type==='free'&&s.text==='');if(fi>=0)segments[fi]={type:'player',text:t,size:1,owner:winnerPIdx,color:players[winnerPIdx].color,hits:0};chIdx++;if(chIdx>=5){go('s-wheel');drawWheel();updateCurrentPlayerBanner();}else showChMenu();}
-
+/* ═══ WHEEL ═══ */
 function updateCurrentPlayerBanner(){const p=players[spinPlayer];document.getElementById('currentPlayerBanner').innerHTML=`<div class="dot" style="background:${p.color};width:16px;height:16px"></div><span style="font-weight:800;color:#2C2C2A;font-size:1rem">${p.name} dreht!</span>`;document.getElementById('currentPlayerBanner').style.background=p.color+'18';document.getElementById('currentPlayerBanner').style.borderColor=p.color;}
-
 function calcHitIdx(){const TAU=Math.PI*2;const total=segments.reduce((s,g)=>s+g.size,0);const rel=((-spinAngle)%TAU+TAU)%TAU;let cum=0;for(let i=0;i<segments.length;i++){const sl=(segments[i].size/total)*TAU;cum+=sl;if(rel<cum)return i;}return segments.length-1;}
 function drawWheel(){
   const cv=document.getElementById('wCanvas');const ctx=cv.getContext('2d');
   const cx=160,cy=160,r=152,TAU=Math.PI*2;const total=segments.reduce((s,g)=>s+g.size,0);
   let a=-Math.PI/2+spinAngle;ctx.clearRect(0,0,320,320);
   segments.forEach(seg=>{const sl=(seg.size/total)*TAU;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+sl);ctx.closePath();ctx.fillStyle=seg.type==='reward'?'#BA7517':seg.type==='free'?'#D3D1C7':seg.color;ctx.fill();ctx.strokeStyle='#f7f5ff';ctx.lineWidth=2.5;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(a+sl/2);const label=seg.type==='reward'?'BONUS':seg.type==='free'?'FREI':seg.text;ctx.font='bold '+(label.length>14?'10px':'12px')+' system-ui';ctx.fillStyle='#fff';ctx.textAlign='right';ctx.fillText(label.substring(0,18),r-6,4);ctx.restore();a+=sl;});
-  ctx.beginPath();ctx.arc(cx,cy,20,0,TAU);ctx.fillStyle='#f7f5ff';ctx.fill();
-  ctx.beginPath();ctx.arc(cx,cy,16,0,TAU);ctx.fillStyle='#7F77DD';ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,20,0,TAU);ctx.fillStyle='#f7f5ff';ctx.fill();ctx.beginPath();ctx.arc(cx,cy,16,0,TAU);ctx.fillStyle='#7F77DD';ctx.fill();
 }
 function spinWheel(){if(spinning)return;spinning=true;document.getElementById('spinBtn').disabled=true;document.getElementById('wheelResult').textContent='';const extra=Math.PI*2*(8+Math.random()*8);const dur=3500+Math.random()*1500;const t0=Date.now(),a0=spinAngle;(function anim(){const prog=Math.min((Date.now()-t0)/dur,1);const ease=1-Math.pow(1-prog,4);spinAngle=a0+extra*ease;drawWheel();if(prog<1){requestAnimationFrame(anim);}else{pendingSegIdx=calcHitIdx();spinning=false;document.getElementById('spinBtn').disabled=false;land();}})();}
-
 function land(){
   const idx=pendingSegIdx;const seg=segments[idx];seg.hits++;if(seg.hits>=2&&seg.size>0.4)seg.size=Math.max(0.25,seg.size*0.65);
   const pname=players[spinPlayer].name;
   if(seg.type==='free'){document.getElementById('wheelResult').textContent='Freies Feld! '+pname+' trägt ein';setTimeout(()=>startFreeField(idx),1200);}
   else if(seg.type==='reward'){document.getElementById('wheelResult').textContent='Belohnungsfeld!';setTimeout(()=>showReward(pname),1000);}
-  else{const mult=pendingBomb?2:1;pendingBomb=false;document.getElementById('wheelResult').textContent=pname+' > '+seg.text+(mult>1?' (DOPPELT!)':'');setTimeout(()=>{document.getElementById('taskPlayer').textContent=pname;document.getElementById('taskPlayer').style.color=players[spinPlayer].color;document.getElementById('taskTxt').textContent=seg.text+(mult>1?' DOPPELTE STRAFE!':'');go('s-task');},1000);}
+  else{const mult=pendingBomb?2:1;pendingBomb=false;document.getElementById('wheelResult').textContent=pname+' → '+seg.text+(mult>1?' (DOPPELT!)':'');setTimeout(()=>{document.getElementById('taskPlayer').textContent=pname;document.getElementById('taskPlayer').style.color=players[spinPlayer].color;document.getElementById('taskTxt').textContent=seg.text+(mult>1?' DOPPELTE STRAFE!':'');go('s-task');},1000);}
 }
 function taskDone(){nextSpin();}
 function nextSpin(){spinPlayer=(spinPlayer+1)%players.length;drawWheel();updateCurrentPlayerBanner();go('s-wheel');}
-
 function startFreeField(segIdx){ffSec=60;const bubble=document.getElementById('fftimer');bubble.textContent=60;bubble.className='timer-bubble';bubble.style.cssText='';document.getElementById('ffTxt').value='';document.getElementById('ffTxt').dataset.si=segIdx;document.getElementById('ffRandomWrap').style.display='none';document.getElementById('ffRandomNextBtn').style.display='none';if(ffInt)clearInterval(ffInt);go('s-freefield');const shrinkT=setTimeout(()=>{bubble.style.cssText='width:40px;height:40px;border:3px solid #7F77DD;font-size:0.85rem;font-weight:800;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#534AB7;margin:0 0 0 auto';},3000);ffInt=setInterval(()=>{ffSec--;bubble.textContent=ffSec;if(ffSec<=10)bubble.className='timer-bubble danger';if(ffSec<=0){clearInterval(ffInt);clearTimeout(shrinkT);bubble.style.cssText='';penaltyFF();}},1000);}
 function penaltyFF(){toast(players[spinPlayer].name+' – Zeit abgelaufen!',3000);nextSpin();}
 function confirmFreeField(){const t=document.getElementById('ffTxt').value.trim();if(!t){toast('Bitte etwas eintragen!');return;}if(ffInt)clearInterval(ffInt);document.getElementById('fftimer').style.cssText='';const si=parseInt(document.getElementById('ffTxt').dataset.si);segments[si]={type:'player',text:t,size:1,owner:spinPlayer,color:players[spinPlayer].color,hits:0};nextSpin();}
-
 function showAddFieldOverlay(){document.getElementById('addFieldTxt').value='';document.getElementById('addFieldRandomWrap').style.display='none';document.getElementById('addFieldNextBtn').style.display='none';document.getElementById('addFieldOverlay').style.display='flex';}
 function closeAddFieldOverlay(){document.getElementById('addFieldOverlay').style.display='none';}
 function confirmAddField(){const t=document.getElementById('addFieldTxt').value.trim();if(!t){toast('Bitte etwas eintragen!');return;}segments.push({type:'player',text:t,size:1,owner:spinPlayer,color:players[spinPlayer].color,hits:0});closeAddFieldOverlay();drawWheel();toast('Feld hinzugefügt!');}
-
 function showReward(pname){
   document.getElementById('rewardPName').textContent=pname+' zieht eine Belohnungskarte';
   const card=REWARDS[rnd(REWARDS.length)];rewardAction=card.action;rewardSeg=-1;swapFirst=-1;
