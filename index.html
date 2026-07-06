@@ -119,6 +119,30 @@ textarea:focus{border-color:#7F77DD}
 .timer-ring-bg{fill:none;stroke:#EEEDFE;stroke-width:8}
 .timer-ring-fg{fill:none;stroke:#7F77DD;stroke-width:8;stroke-linecap:round}
 .timer-ring-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:#3C3489}
+.et-arena{position:relative;width:100%;max-width:420px;height:440px;background:linear-gradient(135deg,#0d0d1e,#1a1a3a);border-radius:20px;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
+.et-timer{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);color:#fff;border-radius:20px;padding:0.3rem 1rem;font-size:1rem;font-weight:800;z-index:10;letter-spacing:1px;pointer-events:none}
+.et-timer.danger{color:#FF5555;animation:etTimerPulse 0.5s ease infinite alternate}
+@keyframes etTimerPulse{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.15)}}
+.et-emoji{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;-webkit-tap-highlight-color:transparent;will-change:transform}
+.et-emoji:active{filter:brightness(1.5)!important}
+@keyframes etPopIn{0%{transform:scale(0) rotate(-30deg);opacity:0}60%{transform:scale(1.25) rotate(8deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}
+@keyframes etPopOut{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(0) rotate(20deg)}}
+@keyframes etFloat{
+  0%  {transform:translate(0,0) rotate(0deg)}
+  10% {transform:translate(var(--ex1),var(--ey1)) rotate(var(--er1))}
+  20% {transform:translate(var(--ex2),var(--ey2)) rotate(var(--er2))}
+  30% {transform:translate(var(--ex3),var(--ey3)) rotate(var(--er3))}
+  40% {transform:translate(var(--ex4),var(--ey4)) rotate(var(--er4))}
+  50% {transform:translate(var(--ex1),var(--ey3)) rotate(var(--er2))}
+  60% {transform:translate(var(--ex3),var(--ey1)) rotate(var(--er4))}
+  70% {transform:translate(var(--ex2),var(--ey4)) rotate(var(--er1))}
+  80% {transform:translate(var(--ex4),var(--ey2)) rotate(var(--er3))}
+  90% {transform:translate(var(--ex2),var(--ey1)) rotate(var(--er2))}
+  100%{transform:translate(0,0) rotate(0deg)}
+}
+@keyframes etMorphFlash{0%{filter:brightness(1)}40%{filter:brightness(2.8) saturate(4)}100%{filter:brightness(1)}}
+.et-score-flash{position:absolute;font-size:1.4rem;font-weight:900;pointer-events:none;z-index:20;animation:etScoreRise 0.8s ease-out forwards}
+@keyframes etScoreRise{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(1.4)}}
 </style>
 </head>
 <body>
@@ -450,6 +474,46 @@ textarea:focus{border-color:#7F77DD}
   <div id="segList" style="width:100%;max-width:380px"></div>
 </div>
 
+<!-- EMOJI TAP: COVER -->
+<div class="screen" id="s-et-cover">
+  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
+  <div class="badge" style="background:#FFF3CC;color:#633806;margin-bottom:1rem">Emoji Tap</div>
+  <div id="etCoverProgress" style="font-size:0.85rem;color:#888780;margin-bottom:0.75rem;font-weight:700;text-align:center"></div>
+  <div id="etCoverBanner" style="width:100%;max-width:380px;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:12px;border:2px solid transparent">
+    <div class="dot" id="etCoverDot" style="width:16px;height:16px"></div>
+    <div><div id="etCoverName" style="font-size:1.3rem;font-weight:800"></div><div style="font-size:0.85rem;color:#888780;margin-top:0.1rem">ist dran</div></div>
+  </div>
+  <div style="background:#fff;border:1.5px solid #CECBF6;border-radius:14px;padding:1.25rem;width:100%;max-width:380px;margin-bottom:1rem">
+    <div style="font-size:0.85rem;font-weight:700;color:#2C2C2A;margin-bottom:0.75rem;text-align:center">Ziel: Punkte sammeln!</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:0.5rem">
+      <div style="display:flex;align-items:center;gap:4px;padding:0.3rem 0.55rem;border-radius:8px;font-size:0.78rem;font-weight:700;background:#FFF3CC;color:#633806">🍺 +3</div>
+      <div style="display:flex;align-items:center;gap:4px;padding:0.3rem 0.55rem;border-radius:8px;font-size:0.78rem;font-weight:700;background:#F0EDFF;color:#534AB7">🎰 +2</div>
+      <div style="display:flex;align-items:center;gap:4px;padding:0.3rem 0.55rem;border-radius:8px;font-size:0.78rem;font-weight:700;background:#FFE8F0;color:#A03060">🚬 +1</div>
+      <div style="display:flex;align-items:center;gap:4px;padding:0.3rem 0.55rem;border-radius:8px;font-size:0.78rem;font-weight:700;background:#E8F5FF;color:#1060A0">💧 −3</div>
+      <div style="display:flex;align-items:center;gap:4px;padding:0.3rem 0.55rem;border-radius:8px;font-size:0.78rem;font-weight:700;background:#E8FFE8;color:#106010">🥗 −2</div>
+      <div style="display:flex;align-items:center;gap:4px;padding:0.3rem 0.55rem;border-radius:8px;font-size:0.78rem;font-weight:700;background:#E8FFE8;color:#106010">🥦 −1</div>
+    </div>
+  </div>
+  <div style="font-size:0.82rem;color:#888780;text-align:center;margin-bottom:1.25rem">Emojis erscheinen und verschwinden – und können sich <strong style="color:#E24B4A">blitzschnell verwandeln</strong>! Du hast <strong>20 Sekunden</strong>.</div>
+  <button class="btn btn-primary" onclick="etStartRound()">START</button>
+</div>
+
+<!-- EMOJI TAP: ARENA -->
+<div class="screen" id="s-et-arena">
+  <div id="etArenaTag" style="font-size:0.9rem;font-weight:800;color:#534AB7;text-align:center;margin-bottom:0.4rem;letter-spacing:1px;text-transform:uppercase"></div>
+  <div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:0.4rem">
+    <div style="display:flex;align-items:center;gap:3px;padding:0.2rem 0.45rem;border-radius:6px;font-size:0.72rem;font-weight:700;background:#FFF3CC;color:#633806">🍺 +3</div>
+    <div style="display:flex;align-items:center;gap:3px;padding:0.2rem 0.45rem;border-radius:6px;font-size:0.72rem;font-weight:700;background:#F0EDFF;color:#534AB7">🎰 +2</div>
+    <div style="display:flex;align-items:center;gap:3px;padding:0.2rem 0.45rem;border-radius:6px;font-size:0.72rem;font-weight:700;background:#FFE8F0;color:#A03060">🚬 +1</div>
+    <div style="display:flex;align-items:center;gap:3px;padding:0.2rem 0.45rem;border-radius:6px;font-size:0.72rem;font-weight:700;background:#E8F5FF;color:#1060A0">💧 −3</div>
+    <div style="display:flex;align-items:center;gap:3px;padding:0.2rem 0.45rem;border-radius:6px;font-size:0.72rem;font-weight:700;background:#E8FFE8;color:#106010">🥗 −2</div>
+    <div style="display:flex;align-items:center;gap:3px;padding:0.2rem 0.45rem;border-radius:6px;font-size:0.72rem;font-weight:700;background:#E8FFE8;color:#106010">🥦 −1</div>
+  </div>
+  <div class="et-arena" id="etArena">
+    <div class="et-timer" id="etTimer">20</div>
+  </div>
+</div>
+
 <!-- ADD FIELD OVERLAY -->
 <div id="addFieldOverlay" style="display:none;position:fixed;inset:0;background:rgba(92,80,180,0.18);z-index:200;align-items:flex-end;justify-content:center">
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:1.5rem 1rem 2rem;border-top:1.5px solid #CECBF6">
@@ -476,9 +540,9 @@ document.getElementById('chTitle').innerHTML=`<div style="font-size:1.4rem;font-
 
 /* ═══ CONSTANTS ═══ */
 const PCOLORS=['#7F77DD','#E24B4A','#1D9E75','#BA7517','#D4537E','#378ADD','#D85A30','#534AB7'];
-const ALL_CHALLENGES=['hot','roulette','ts','bid','flu','memory','money','addup','countup'];
-const CHNAMES={hot:'Höher oder Tiefer',roulette:'Russisch Roulette',ts:'Time Stop',bid:'Bieter-Duell',flu:'Fli Fla Flu',memory:'Memory',money:'Geld zählen',addup:'Addieren',countup:'Hochzählen'};
-const CHEMOJI={hot:'🃏',roulette:'🔫',ts:'⏱️',bid:'💰',flu:'✂️',memory:'🧩',money:'💶',addup:'➕',countup:'🔢'};
+const ALL_CHALLENGES=['hot','roulette','ts','bid','flu','memory','money','addup','countup','emojitap'];
+const CHNAMES={hot:'Höher oder Tiefer',roulette:'Russisch Roulette',ts:'Time Stop',bid:'Bieter-Duell',flu:'Fli Fla Flu',memory:'Memory',money:'Geld zählen',addup:'Addieren',countup:'Hochzählen',emojitap:'Emoji Tap'};
+const CHEMOJI={hot:'🃏',roulette:'🔫',ts:'⏱️',bid:'💰',flu:'✂️',memory:'🧩',money:'💶',addup:'➕',countup:'🔢',emojitap:'🍺'};
 const REWARDS=[
   {icon:'✏️',title:'Redakteur',desc:'Verändere den Text eines beliebigen Feldes',action:'edit'},
   {icon:'🗑️',title:'Auslöscher',desc:'Lösche ein Feld – es wird wieder frei',action:'delete'},
@@ -559,6 +623,7 @@ function launchChallenge(){
   else if(t==='money')initMoney();
   else if(t==='addup')initAdd();
   else if(t==='countup')initCountup();
+  else if(t==='emojitap')initEmojiTap();
 }
 
 /* ═══ CHALLENGE WON ═══ */
@@ -1164,6 +1229,190 @@ function showReward(pname){
 }
 function selRewardSeg(i){if(rewardAction==='edit'){const nt=prompt('Neuer Text:',segments[i].text);if(nt&&nt.trim()){segments[i].text=nt.trim();toast('Feld geändert!');afterReward();}return;}if(rewardAction==='swap'){if(swapFirst===-1){swapFirst=i;document.getElementById('rs'+i).style.borderColor='#7F77DD';toast('Zweites Feld wählen');}else if(swapFirst!==i){rewardSeg=i;document.getElementById('rewardConfBtn').style.display='flex';}return;}rewardSeg=i;document.querySelectorAll('[id^="rs"]').forEach(e=>e.style.borderColor='#EEEDFE');document.getElementById('rs'+i).style.borderColor='#7F77DD';document.getElementById('rewardConfBtn').style.display='flex';}
 function applyReward(){const a=rewardAction,i=rewardSeg;if(a==='delete'){segments[i]={type:'free',text:'',size:1,owner:null,color:'#D3D1C7',hits:0};toast('Feld gelöscht!');}else if(a==='grow'){segments[i].size=Math.min(segments[i].size*2,4);toast('Feld vergrößert!');}else if(a==='shrink'){segments[i].size=Math.max(segments[i].size*0.5,0.25);toast('Feld verkleinert!');}else if(a==='swap'&&swapFirst>=0){[segments[i],segments[swapFirst]]=[segments[swapFirst],segments[i]];toast('Felder getauscht!');}afterReward();}
+/* ═══════════════════════════════════════
+   EMOJI TAP
+═══════════════════════════════════════ */
+const ET_EMOJIS=[
+  {e:'🍺',pts:3,good:true},
+  {e:'🎰',pts:2,good:true},
+  {e:'🚬',pts:1,good:true},
+  {e:'💧',pts:-3,good:false},
+  {e:'🥗',pts:-2,good:false},
+  {e:'🥦',pts:-1,good:false},
+];
+const ET_WEIGHTS=[3,3,4,2,2,3];
+let etScores={},etCurPidx=0,etRoundScore=0,etArenaTimer=null,etSpawnTimer=null;
+
+function etRandEmoji(){
+  const total=ET_WEIGHTS.reduce((a,b)=>a+b,0);
+  let r=Math.floor(Math.random()*total);
+  for(let i=0;i<ET_EMOJIS.length;i++){r-=ET_WEIGHTS[i];if(r<0)return ET_EMOJIS[i];}
+  return ET_EMOJIS[0];
+}
+
+function initEmojiTap(){
+  etScores={};etCurPidx=rnd(players.length);
+  etShowCover();
+}
+
+function etShowCover(){
+  const p=players[etCurPidx];
+  const answered=Object.keys(etScores).length;
+  document.getElementById('etCoverProgress').textContent='Spieler '+(answered+1)+' von '+players.length;
+  document.getElementById('etCoverName').textContent=p.name;
+  document.getElementById('etCoverName').style.color=p.color;
+  document.getElementById('etCoverDot').style.background=p.color;
+  const banner=document.getElementById('etCoverBanner');
+  banner.style.background=p.color+'15';banner.style.borderColor=p.color+'55';
+  go('s-et-cover');
+}
+
+function etStartRound(){
+  etRoundScore=0;
+  const p=players[etCurPidx];
+  document.getElementById('etArenaTag').textContent=p.name.toUpperCase();
+  const arena=document.getElementById('etArena');
+  while(arena.children.length>1)arena.removeChild(arena.lastChild);
+  const timerEl=document.getElementById('etTimer');
+  timerEl.textContent='20';timerEl.className='et-timer';
+  go('s-et-arena');
+  let remaining=20;
+  etArenaTimer=setInterval(()=>{
+    remaining--;
+    timerEl.textContent=remaining;
+    if(remaining<=5)timerEl.className='et-timer danger';
+    if(remaining<=0){clearInterval(etArenaTimer);clearTimeout(etSpawnTimer);etEndRound();}
+  },1000);
+  etScheduleSpawn();
+}
+
+function etScheduleSpawn(){
+  const delay=150+rnd(350);
+  etSpawnTimer=setTimeout(()=>{etSpawnEmoji();etScheduleSpawn();},delay);
+}
+
+function etSpawnEmoji(){
+  const arena=document.getElementById('etArena');
+  const W=arena.clientWidth||360,H=arena.clientHeight||440;
+  const size=48+rnd(20);
+  let em=etRandEmoji();
+  const x=rnd(W-size);
+  const y=rnd(H-size-40)+30;
+  const lifetime=800+rnd(1400);
+
+  const el=document.createElement('div');
+  el.className='et-emoji';
+
+  function applyStyle(e){
+    el.style.cssText='width:'+size+'px;height:'+size+'px;left:'+x+'px;top:'+y+'px;font-size:'+(size*0.56)+'px;background:'+(e.good?'rgba(255,220,50,0.2)':'rgba(226,75,74,0.18)')+';border:2.5px solid '+(e.good?'rgba(255,200,0,0.5)':'rgba(226,75,74,0.5)')+';box-shadow:'+(e.good?'0 4px 20px rgba(255,200,0,0.55)':'0 4px 20px rgba(226,75,74,0.55)')+';position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;will-change:transform;-webkit-tap-highlight-color:transparent';
+    el.textContent=e.e;
+    el._em=e;
+  }
+  applyStyle(em);
+
+  // 4 random drift vectors – large & fast
+  const v=()=>(rnd(90)-45)+'px';
+  const r=()=>(rnd(40)-20)+'deg';
+  el.style.setProperty('--ex1',v());el.style.setProperty('--ey1',v());
+  el.style.setProperty('--ex2',v());el.style.setProperty('--ey2',v());
+  el.style.setProperty('--ex3',v());el.style.setProperty('--ey3',v());
+  el.style.setProperty('--ex4',v());el.style.setProperty('--ey4',v());
+  el.style.setProperty('--er1',r());el.style.setProperty('--er2',r());
+  el.style.setProperty('--er3',r());el.style.setProperty('--er4',r());
+
+  const spd=(0.35+Math.random()*0.4).toFixed(2)+'s';
+  el.style.animation='etPopIn 0.18s ease forwards, etFloat '+spd+' linear infinite';
+
+  // Morph: switch emoji after 300-800ms
+  const morphDelay=300+rnd(500);
+  const morphT=setTimeout(()=>{
+    if(!el.parentNode)return;
+    const newEm=etRandEmoji();
+    el.style.animation='etMorphFlash 0.25s ease, etFloat '+spd+' linear infinite';
+    applyStyle(newEm);
+    setTimeout(()=>{if(el.parentNode)el.style.animation='etFloat '+spd+' linear infinite';},250);
+  },morphDelay);
+  el._morphT=morphT;
+
+  el.addEventListener('pointerdown',(ev)=>{
+    ev.stopPropagation();ev.preventDefault();
+    if(!el.parentNode)return;
+    clearTimeout(el._morphT);
+    const pts=(el._em||em).pts;
+    etRoundScore+=pts;
+    // Score flash
+    const ar=document.getElementById('etArena');
+    const arRect=ar.getBoundingClientRect();
+    const elRect=el.getBoundingClientRect();
+    const fx=elRect.left-arRect.left+elRect.width/2-20;
+    const fy=elRect.top-arRect.top;
+    const flash=document.createElement('div');
+    flash.className='et-score-flash';
+    flash.style.cssText='left:'+fx+'px;top:'+fy+'px;color:'+(pts>0?'#1D9E75':'#E24B4A');
+    flash.textContent=(pts>0?'+':'')+pts;
+    ar.appendChild(flash);
+    setTimeout(()=>{if(flash.parentNode)flash.parentNode.removeChild(flash);},800);
+    el.style.animation='etPopOut 0.15s ease forwards';
+    setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el);},150);
+  },{passive:false});
+
+  arena.appendChild(el);
+
+  setTimeout(()=>{
+    if(el.parentNode){clearTimeout(el._morphT);el.style.animation='etPopOut 0.15s ease forwards';setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el);},150);}
+  },lifetime);
+}
+
+function etEndRound(){
+  const arena=document.getElementById('etArena');
+  while(arena.children.length>1)arena.removeChild(arena.lastChild);
+  etScores[etCurPidx]=etRoundScore;
+  const answered=Object.keys(etScores).length;
+  if(answered>=players.length){etShowResults();return;}
+  etCurPidx=(etCurPidx+1)%players.length;
+  while(etScores[etCurPidx]!==undefined)etCurPidx=(etCurPidx+1)%players.length;
+  etShowCover();
+}
+
+function etShowResults(){
+  const sorted=players.map((p,i)=>({i,p,score:etScores[i]||0})).sort((a,b)=>b.score-a.score);
+  const winners=sorted.filter(r=>r.score===sorted[0].score);
+  // Build result in s-et-cover (reuse)
+  document.getElementById('etCoverProgress').textContent='';
+  document.getElementById('etCoverName').textContent='';
+  document.getElementById('etCoverDot').style.background='transparent';
+  const banner=document.getElementById('etCoverBanner');
+  banner.style.cssText='display:none';
+  const startBtn=document.querySelector('#s-et-cover .btn-primary');
+  if(startBtn)startBtn.style.display='none';
+  let existing=document.getElementById('etResultDiv');
+  if(existing)existing.remove();
+  const div=document.createElement('div');
+  div.id='etResultDiv';
+  div.style.cssText='width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center';
+  div.innerHTML=
+    '<div class="badge" style="background:#FFF3CC;color:#633806;margin-bottom:0.75rem">Ergebnis</div>'+
+    sorted.map((r,i)=>
+      '<div class="result-row">'+
+        '<div style="display:flex;align-items:center">'+
+          '<div class="dot" style="background:'+r.p.color+';margin-right:8px"></div>'+
+          '<span style="font-weight:700;color:#2C2C2A">'+r.p.name+'</span>'+
+          (i===0?'<span class="winner-pill">Sieger</span>':'')+
+        '</div>'+
+        '<div style="font-size:1.4rem;font-weight:800;color:'+(r.score>=0?'#1D9E75':'#E24B4A')+'">'+
+          (r.score>0?'+':'')+r.score+' Pkt'+
+        '</div>'+
+      '</div>'
+    ).join('')+
+    (winners.length>1
+      ? '<div style="font-size:0.85rem;font-weight:700;color:#888780;text-align:center;margin-top:0.75rem">Gleichstand – Sieger wählen:</div>'+
+        winners.map(r=>'<button class="btn btn-success" style="margin-top:0.4rem" onclick="challengeWon('+r.i+')">'+r.p.name+'</button>').join('')
+      : '<button class="btn btn-primary" style="margin-top:0.75rem;width:100%;max-width:380px" onclick="challengeWon('+sorted[0].i+')">Weiter</button>');
+  document.getElementById('s-et-cover').appendChild(div);
+  go('s-et-cover');
+}
+
+
 function afterReward(){drawWheel();updateCurrentPlayerBanner();go('s-wheel');}
 </script>
 </body>
