@@ -143,6 +143,7 @@ textarea:focus{border-color:#7F77DD}
 @keyframes etMorphFlash{0%{filter:brightness(1)}40%{filter:brightness(2.8) saturate(4)}100%{filter:brightness(1)}}
 .et-score-flash{position:absolute;font-size:1.4rem;font-weight:900;pointer-events:none;z-index:20;animation:etScoreRise 0.8s ease-out forwards}
 @keyframes etScoreRise{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(1.4)}}
+.bf-glass-wrap{position:relative;width:180px;margin:0.5rem auto;touch-action:none;cursor:pointer}
 </style>
 </head>
 <body>
@@ -514,6 +515,38 @@ textarea:focus{border-color:#7F77DD}
   </div>
 </div>
 
+<!-- BIERFILL: COVER -->
+<div class="screen" id="s-bf-cover">
+  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
+  <div class="badge" style="background:#FFF3CC;color:#633806;margin-bottom:1rem">Bierglas füllen</div>
+  <div id="bfCoverProgress" style="font-size:0.85rem;color:#888780;margin-bottom:0.75rem;font-weight:700;text-align:center"></div>
+  <div id="bfCoverBanner" style="width:100%;max-width:380px;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:12px;border:2px solid transparent">
+    <div class="dot" id="bfCoverDot" style="width:16px;height:16px"></div>
+    <div><div id="bfCoverName" style="font-size:1.3rem;font-weight:800"></div><div style="font-size:0.85rem;color:#888780;margin-top:0.1rem">ist dran</div></div>
+  </div>
+  <div style="background:#fff;border:1.5px solid #CECBF6;border-radius:14px;padding:1.25rem;width:100%;max-width:380px;text-align:center;margin-bottom:1.5rem">
+    <div style="font-size:0.85rem;color:#888780;margin-bottom:0.5rem">Zielmenge</div>
+    <div id="bfCoverTarget" style="font-size:2.5rem;font-weight:800;color:#f0a500">– l</div>
+    <div style="font-size:0.82rem;color:#888780;margin-top:0.5rem">Halte gedrückt auf das Glas um zu befüllen.<br>Loslassen und wieder halten zum Feinabstimmen.<br><strong style="color:#E24B4A">Du siehst nicht wie viel du befüllt hast!</strong></div>
+  </div>
+  <button class="btn btn-primary" onclick="bfStartFill()">START</button>
+</div>
+
+<!-- BIERFILL: FILL -->
+<div class="screen" id="s-bf-fill">
+  <div id="bfFillTag" style="font-size:0.9rem;font-weight:800;color:#534AB7;text-align:center;margin-bottom:0.25rem;letter-spacing:1px;text-transform:uppercase"></div>
+  <div style="font-size:0.82rem;color:#888780;text-align:center;margin-bottom:0.5rem">Halte gedrückt – lass los zum Feinabstimmen</div>
+  <div class="bf-glass-wrap" id="bfGlassWrap">
+    <canvas id="bfCanvas" width="180" height="280" style="display:block;margin:0 auto"></canvas>
+  </div>
+  <div style="background:#EEEDFE;border-radius:12px;padding:0.85rem;width:100%;max-width:380px;text-align:center;margin-bottom:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.75rem">
+    <span style="font-size:1.5rem">🙈</span>
+    <span style="font-size:0.9rem;font-weight:700;color:#888780">Füllstand verdeckt</span>
+  </div>
+  <div id="bfHoldHint" style="font-size:0.85rem;color:#888780;text-align:center;font-weight:700;margin-bottom:0.75rem">Gedrückt halten zum Befüllen</div>
+  <button class="btn btn-primary" id="bfNextBtn" style="display:none" onclick="bfAfterFill()">Weiter →</button>
+</div>
+
 <!-- ADD FIELD OVERLAY -->
 <div id="addFieldOverlay" style="display:none;position:fixed;inset:0;background:rgba(92,80,180,0.18);z-index:200;align-items:flex-end;justify-content:center">
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:1.5rem 1rem 2rem;border-top:1.5px solid #CECBF6">
@@ -540,9 +573,9 @@ document.getElementById('chTitle').innerHTML=`<div style="font-size:1.4rem;font-
 
 /* ═══ CONSTANTS ═══ */
 const PCOLORS=['#7F77DD','#E24B4A','#1D9E75','#BA7517','#D4537E','#378ADD','#D85A30','#534AB7'];
-const ALL_CHALLENGES=['hot','roulette','ts','bid','flu','memory','money','addup','countup','emojitap'];
-const CHNAMES={hot:'Höher oder Tiefer',roulette:'Russisch Roulette',ts:'Time Stop',bid:'Bieter-Duell',flu:'Fli Fla Flu',memory:'Memory',money:'Geld zählen',addup:'Addieren',countup:'Hochzählen',emojitap:'Emoji Tap'};
-const CHEMOJI={hot:'🃏',roulette:'🔫',ts:'⏱️',bid:'💰',flu:'✂️',memory:'🧩',money:'💶',addup:'➕',countup:'🔢',emojitap:'🍺'};
+const ALL_CHALLENGES=['hot','roulette','ts','bid','flu','memory','money','addup','countup','emojitap','bierfill'];
+const CHNAMES={hot:'Höher oder Tiefer',roulette:'Russisch Roulette',ts:'Time Stop',bid:'Bieter-Duell',flu:'Fli Fla Flu',memory:'Memory',money:'Geld zählen',addup:'Addieren',countup:'Hochzählen',emojitap:'Emoji Tap',bierfill:'Bierglas füllen'};
+const CHEMOJI={hot:'🃏',roulette:'🔫',ts:'⏱️',bid:'💰',flu:'✂️',memory:'🧩',money:'💶',addup:'➕',countup:'🔢',emojitap:'🍺',bierfill:'🍺'};
 const REWARDS=[
   {icon:'✏️',title:'Redakteur',desc:'Verändere den Text eines beliebigen Feldes',action:'edit'},
   {icon:'🗑️',title:'Auslöscher',desc:'Lösche ein Feld – es wird wieder frei',action:'delete'},
@@ -624,6 +657,7 @@ function launchChallenge(){
   else if(t==='addup')initAdd();
   else if(t==='countup')initCountup();
   else if(t==='emojitap')initEmojiTap();
+  else if(t==='bierfill')initBierfill();
 }
 
 /* ═══ CHALLENGE WON ═══ */
@@ -1410,6 +1444,222 @@ function etShowResults(){
       : '<button class="btn btn-primary" style="margin-top:0.75rem;width:100%;max-width:380px" onclick="challengeWon('+sorted[0].i+')">Weiter</button>');
   document.getElementById('s-et-cover').appendChild(div);
   go('s-et-cover');
+}
+
+
+/* ═══════════════════════════════════════
+   BIERGLAS FÜLLEN
+═══════════════════════════════════════ */
+const BF_MAX=1.0;
+const BF_RATE=0.008;
+let bfTarget=0,bfAnswers={},bfCurPidx=0,bfFill=0,bfHolding=false,bfInterval=null;
+
+function bfGenTarget(){
+  const steps=Math.floor(Math.random()*80)+10;
+  return Math.round(steps)/100;
+}
+
+function initBierfill(){
+  bfTarget=bfGenTarget();
+  bfAnswers={};
+  bfCurPidx=rnd(players.length);
+  bfShowCover();
+}
+
+function bfShowCover(){
+  const p=players[bfCurPidx];
+  const answered=Object.keys(bfAnswers).length;
+  document.getElementById('bfCoverProgress').textContent='Spieler '+(answered+1)+' von '+players.length;
+  document.getElementById('bfCoverName').textContent=p.name;
+  document.getElementById('bfCoverName').style.color=p.color;
+  document.getElementById('bfCoverDot').style.background=p.color;
+  document.getElementById('bfCoverTarget').textContent=bfTarget.toFixed(2)+' l';
+  const banner=document.getElementById('bfCoverBanner');
+  banner.style.background=p.color+'15';banner.style.borderColor=p.color+'55';
+  go('s-bf-cover');
+}
+
+function bfStartFill(){
+  bfTeardown();
+  bfFill=0;bfHolding=false;
+  const p=players[bfCurPidx];
+  document.getElementById('bfFillTag').textContent=p.name.toUpperCase();
+  document.getElementById('bfNextBtn').style.display='none';
+  document.getElementById('bfHoldHint').textContent='Gedrückt halten zum Befüllen';
+  document.getElementById('bfHoldHint').style.color='#888780';
+  bfDraw(0,false);
+  go('s-bf-fill');
+  bfSetup();
+}
+
+function bfSetup(){
+  const scr=document.getElementById('s-bf-fill');
+  scr.addEventListener('pointerdown',bfHoldStart,{passive:false});
+  scr.addEventListener('pointerup',bfHoldEnd,{passive:false});
+  scr.addEventListener('pointercancel',bfHoldEnd,{passive:false});
+}
+
+function bfTeardown(){
+  const scr=document.getElementById('s-bf-fill');
+  scr.removeEventListener('pointerdown',bfHoldStart);
+  scr.removeEventListener('pointerup',bfHoldEnd);
+  scr.removeEventListener('pointercancel',bfHoldEnd);
+}
+
+function bfHoldStart(e){
+  if(e.target.id==='bfNextBtn')return;
+  e.preventDefault();
+  if(bfHolding)return;
+  bfHolding=true;
+  document.getElementById('bfHoldHint').textContent='Befüllt...';
+  document.getElementById('bfHoldHint').style.color='#1D9E75';
+  bfInterval=setInterval(()=>{
+    if(!bfHolding)return;
+    bfFill=Math.min(BF_MAX,bfFill+BF_RATE);
+    bfDraw(bfFill/BF_MAX,true);
+    if(bfFill>=BF_MAX)bfHoldEnd();
+  },50);
+}
+
+function bfHoldEnd(e){
+  if(!bfHolding)return;
+  bfHolding=false;
+  clearInterval(bfInterval);
+  document.getElementById('bfHoldHint').textContent='Loslassen – nochmal halten zum Feinabstimmen';
+  document.getElementById('bfHoldHint').style.color='#888780';
+  document.getElementById('bfNextBtn').style.display='flex';
+}
+
+function bfAfterFill(){
+  bfTeardown();
+  bfAnswers[bfCurPidx]=bfFill;
+  bfDraw(0,false);
+  const answered=Object.keys(bfAnswers).length;
+  if(answered>=players.length){bfShowResults();return;}
+  bfCurPidx=(bfCurPidx+1)%players.length;
+  while(bfAnswers[bfCurPidx]!==undefined)bfCurPidx=(bfCurPidx+1)%players.length;
+  bfShowCover();
+}
+
+function bfDraw(fillFrac,showFoam){
+  const canvas=document.getElementById('bfCanvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const W=180,H=280;
+  ctx.clearRect(0,0,W,H);
+  const bodyX=30,bodyW=100,bodyTop=30,bodyBot=250,bodyH=bodyBot-bodyTop;
+  const topW=bodyW*0.88,topX=bodyX+(bodyW-topW)/2;
+  // Handle
+  const hx=bodyX+bodyW+2;
+  ctx.beginPath();ctx.moveTo(hx,80);ctx.bezierCurveTo(hx+28,80,hx+28,180,hx,180);ctx.bezierCurveTo(hx+16,180,hx+16,80,hx,80);
+  ctx.fillStyle='rgba(200,230,255,0.35)';ctx.fill();ctx.strokeStyle='rgba(100,160,220,0.7)';ctx.lineWidth=3;ctx.stroke();
+  // Fill
+  if(fillFrac>0){
+    ctx.save();
+    ctx.beginPath();ctx.moveTo(topX,bodyTop);ctx.lineTo(topX+topW,bodyTop);ctx.lineTo(bodyX+bodyW,bodyBot);ctx.lineTo(bodyX,bodyBot);ctx.closePath();ctx.clip();
+    const fillH=bodyH*fillFrac,fillTop=bodyBot-fillH;
+    const grad=ctx.createLinearGradient(bodyX,fillTop,bodyX+bodyW,fillTop);
+    grad.addColorStop(0,'rgba(240,165,0,0.9)');grad.addColorStop(0.5,'rgba(249,201,0,0.95)');grad.addColorStop(1,'rgba(220,140,0,0.9)');
+    ctx.fillStyle=grad;ctx.fillRect(bodyX-2,fillTop,bodyW+4,fillH+2);
+    if(showFoam&&fillFrac>0.05){
+      const foamH=Math.min(22,fillH*0.18);
+      ctx.fillStyle='rgba(255,255,255,0.92)';
+      for(let bx=bodyX;bx<bodyX+bodyW;bx+=10){const br=5+Math.sin(bx*0.5)*2;ctx.beginPath();ctx.arc(bx+5,fillTop+foamH/2,br,0,Math.PI*2);ctx.fill();}
+      ctx.fillStyle='rgba(255,255,255,0.75)';
+      for(let bx=bodyX+5;bx<bodyX+bodyW;bx+=10){ctx.beginPath();ctx.arc(bx,fillTop+foamH*0.2,3.5,0,Math.PI*2);ctx.fill();}
+    }
+    ctx.restore();
+  }
+  // Outline
+  ctx.beginPath();ctx.moveTo(topX,bodyTop);ctx.lineTo(topX+topW,bodyTop);ctx.lineTo(bodyX+bodyW,bodyBot);ctx.lineTo(bodyX,bodyBot);ctx.closePath();
+  ctx.strokeStyle='rgba(100,160,220,0.8)';ctx.lineWidth=3.5;ctx.stroke();ctx.fillStyle='rgba(220,240,255,0.12)';ctx.fill();
+  // Shine
+  ctx.beginPath();ctx.moveTo(topX+8,bodyTop+10);ctx.lineTo(topX+18,bodyTop+10);ctx.lineTo(bodyX+14,bodyBot-20);ctx.lineTo(bodyX+6,bodyBot-20);ctx.closePath();ctx.fillStyle='rgba(255,255,255,0.22)';ctx.fill();
+  // Bottom
+  ctx.beginPath();ctx.moveTo(bodyX-4,bodyBot);ctx.lineTo(bodyX+bodyW+4,bodyBot);ctx.lineTo(bodyX+bodyW+8,bodyBot+12);ctx.lineTo(bodyX-8,bodyBot+12);ctx.closePath();
+  ctx.fillStyle='rgba(160,200,240,0.5)';ctx.fill();ctx.strokeStyle='rgba(100,160,220,0.7)';ctx.lineWidth=2;ctx.stroke();
+}
+
+function bfDrawMini(canvas,fillFrac,color,name){
+  const ctx=canvas.getContext('2d');
+  const W=100,H=160;
+  ctx.clearRect(0,0,W,H);
+  const bodyX=18,bodyW=58,bodyTop=16,bodyBot=138,bodyH=bodyBot-bodyTop;
+  const topW=bodyW*0.88,topX=bodyX+(bodyW-topW)/2;
+  const hx=bodyX+bodyW+1;
+  ctx.beginPath();ctx.moveTo(hx,45);ctx.bezierCurveTo(hx+16,45,hx+16,98,hx,98);ctx.bezierCurveTo(hx+10,98,hx+10,45,hx,45);
+  ctx.fillStyle='rgba(200,230,255,0.35)';ctx.fill();ctx.strokeStyle='rgba(100,160,220,0.6)';ctx.lineWidth=2;ctx.stroke();
+  if(fillFrac>0){
+    ctx.save();
+    ctx.beginPath();ctx.moveTo(topX,bodyTop);ctx.lineTo(topX+topW,bodyTop);ctx.lineTo(bodyX+bodyW,bodyBot);ctx.lineTo(bodyX,bodyBot);ctx.closePath();ctx.clip();
+    const fillH=bodyH*fillFrac,fillTop=bodyBot-fillH;
+    const grad=ctx.createLinearGradient(bodyX,fillTop,bodyX+bodyW,fillTop);
+    grad.addColorStop(0,'rgba(240,165,0,0.9)');grad.addColorStop(0.5,'rgba(249,201,0,0.95)');grad.addColorStop(1,'rgba(220,140,0,0.9)');
+    ctx.fillStyle=grad;ctx.fillRect(bodyX-1,fillTop,bodyW+2,fillH+1);
+    ctx.fillStyle='rgba(255,255,255,0.9)';
+    for(let bx=bodyX;bx<bodyX+bodyW;bx+=7){ctx.beginPath();ctx.arc(bx+3,fillTop+4,3.5,0,Math.PI*2);ctx.fill();}
+    ctx.restore();
+  }
+  ctx.beginPath();ctx.moveTo(topX,bodyTop);ctx.lineTo(topX+topW,bodyTop);ctx.lineTo(bodyX+bodyW,bodyBot);ctx.lineTo(bodyX,bodyBot);ctx.closePath();
+  ctx.strokeStyle='rgba(100,160,220,0.8)';ctx.lineWidth=2.5;ctx.stroke();ctx.fillStyle='rgba(220,240,255,0.1)';ctx.fill();
+  ctx.beginPath();ctx.moveTo(bodyX-3,bodyBot);ctx.lineTo(bodyX+bodyW+3,bodyBot);ctx.lineTo(bodyX+bodyW+5,bodyBot+8);ctx.lineTo(bodyX-5,bodyBot+8);ctx.closePath();
+  ctx.fillStyle='rgba(160,200,240,0.5)';ctx.fill();ctx.strokeStyle='rgba(100,160,220,0.6)';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.font='bold 9px system-ui';ctx.textAlign='center';
+  ctx.fillStyle=color;ctx.fillText(name,W/2,H-8);
+  ctx.fillStyle='rgba(80,100,140,0.8)';ctx.fillText(fillFrac>0?(fillFrac*BF_MAX).toFixed(3)+'l':'–',W/2,H-20);
+}
+
+function bfShowResults(){
+  const sorted=players.map((p,i)=>({
+    i,p,
+    val:bfAnswers[i]!==undefined?bfAnswers[i]:null,
+    diff:bfAnswers[i]!==undefined?Math.abs(bfAnswers[i]-bfTarget):9999
+  })).sort((a,b)=>a.diff-b.diff);
+  const winners=sorted.filter(r=>r.diff===sorted[0].diff);
+
+  // Reuse s-bf-cover as result screen
+  document.getElementById('bfCoverProgress').textContent='';
+  document.getElementById('bfCoverName').textContent='';
+  document.getElementById('bfCoverDot').style.background='transparent';
+  document.getElementById('bfCoverBanner').style.display='none';
+  const startBtn=document.querySelector('#s-bf-cover .btn-primary');
+  if(startBtn)startBtn.style.display='none';
+
+  let existing=document.getElementById('bfResultDiv');
+  if(existing)existing.remove();
+  const div=document.createElement('div');
+  div.id='bfResultDiv';
+  div.style.cssText='width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center';
+
+  // Mini glasses
+  const glassRow=document.createElement('div');
+  glassRow.style.cssText='display:flex;gap:16px;justify-content:center;margin-bottom:0.75rem;flex-wrap:wrap';
+  sorted.forEach(r=>{
+    const frac=r.val!==null?Math.min(1,r.val/BF_MAX):0;
+    const cv=document.createElement('canvas');cv.width=100;cv.height=160;
+    glassRow.appendChild(cv);
+    bfDrawMini(cv,frac,r.p.color,r.p.name);
+  });
+
+  // Target + result rows
+  const targetHTML='<div style="background:#fff;border:1.5px solid #CECBF6;border-radius:14px;padding:0.75rem 1rem;width:100%;text-align:center;margin-bottom:0.75rem"><div style="font-size:0.75rem;color:#888780;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.3rem">Zielmenge</div><div style="font-size:2rem;font-weight:800;color:#f0a500">'+bfTarget.toFixed(2)+' l</div></div>';
+
+  const rowsHTML=sorted.map((r,i)=>{
+    const dc=r.diff===9999?'diff-bad':r.diff<0.03?'diff-great':r.diff<0.1?'diff-ok':'diff-bad';
+    const valStr=r.val!==null?r.val.toFixed(3)+' l':'–';
+    const diffStr=r.diff===9999?'–':'±'+r.diff.toFixed(3)+'l';
+    return'<div class="result-row"><div style="display:flex;align-items:center"><div class="dot" style="background:'+r.p.color+';margin-right:8px"></div><span style="font-weight:700;color:#2C2C2A">'+r.p.name+'</span>'+(i===0?'<span class="winner-pill">Sieger</span>':'')+'</div><div style="display:flex;align-items:center;gap:6px"><span style="font-family:monospace;font-weight:700;color:#2C2C2A">'+valStr+'</span><span class="'+dc+'">'+diffStr+'</span></div></div>';
+  }).join('');
+
+  const winnerHTML=winners.length>1
+    ?'<div style="font-size:0.85rem;font-weight:700;color:#888780;text-align:center;margin-top:0.75rem;margin-bottom:0.5rem">Gleichstand – Sieger wählen (Fli Fla Flu):</div>'+
+      winners.map(r=>'<button class="btn btn-success" style="margin-top:0.4rem" onclick="challengeWon('+r.i+')">'+r.p.name+'</button>').join('')
+    :'<button class="btn btn-primary" style="margin-top:0.75rem;width:100%;max-width:380px" onclick="challengeWon('+sorted[0].i+')">Weiter</button>';
+
+  div.innerHTML=targetHTML+rowsHTML+winnerHTML;
+  div.insertBefore(glassRow,div.firstChild);
+  document.getElementById('s-bf-cover').appendChild(div);
+  go('s-bf-cover');
 }
 
 
