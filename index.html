@@ -662,10 +662,11 @@ const REWARDS=[
   {icon:'🗑️',title:'Auslöscher',desc:'Lösche ein Feld – es wird wieder frei',action:'delete'},
   {icon:'📈',title:'Aufbläher',desc:'Verdopple die Größe eines Feldes',action:'grow'},
   {icon:'📉',title:'Schrumpfer',desc:'Halbiere die Größe eines Feldes',action:'shrink'},
-  {icon:'🔄',title:'Saboteur',desc:'Tausche zwei Felder miteinander',action:'swap'},
-  {icon:'💣',title:'Zeitbombe',desc:'Nächstes Feld: doppelte Strafe!',action:'bomb'}
+  {icon:'🚀',title:'Aufbläher Extrem',desc:'Vervierfache die Größe eines Feldes',action:'growExtreme'},
+  {icon:'🔬',title:'Schrumpfer Extrem',desc:'Verringere die Größe eines Feldes auf ein Viertel',action:'shrinkExtreme'},
+  {icon:'👑',title:'Patenschaft',desc:'Klaue jemandem den Anspruch, bei seinem Feld einen Schluck zu verteilen',action:'godfather'}
 ];
-const RANDOM_TASKS=['Trinke 3 Schlücke','Trinke 1 Shot','Wasserfall','Trinkbuddy für 3 Runden','Auf EX','Deine Nachbarn trinken','Imitiere ein Tier','Abstimmung wer trinkt',"Verschick' ein Selfie",'Trinke 2 Schlücke','Trinke 4 Schlücke','Trinke 5 Schlücke','Trinkspruch','Redewendung','Kompliment an alle','Trinke aus einem anderen Getränk'];
+const RANDOM_TASKS=['Trinke 3 Schlücke','Trinke 1 Shot','Wasserfall','Trinkbuddy für 3 Runden','Auf EX','Deine Nachbarn trinken','Imitiere ein Tier','Abstimmung wer trinkt',"Verschick' ein Selfie",'Trinke 2 Schlücke','Trinke 4 Schlücke','Trinke 5 Schlücke','Trinkspruch','Redewendung','Kompliment an alle','Trinke aus einem anderen Getränk','Alle trinken','Lass ChatGPT einen Witz erzählen','Stille Post','Wer würde eher?','Gruppenfoto','Der, der das Handy hält, trinkt','Klamottentausch','Würfel deine Schlücke','10 Minuten keine Namen mehr nennen','Rechts von dir muss trinken','Links von dir muss trinken','Alle Männer trinken','Alle Frauen trinken','Niedrigster Akku trinkt','Verteile 1 Schluck','Verteile 2 Schlücke','Verteile 3 Schlücke','Verteile 4 Schlücke','Verteile 5 Schlücke','Frag ChatGPT wer wieviel trinken soll','10 Minuten Toilettenverbot','DJ trinkt','DJ verteilt 3 Schlücke','Busfahrer','Der Jüngste trinkt','Der Älteste trinkt','Fuck Marry Kill','Alle mit Geschwistern trinken','Der, der als erstes das nächste Lied kennt, verteilt 4 Schlücke','Zeige ein zufälliges Foto aus deiner Fotogalerie','Ziehe 1 Sache aus','Taktisches Zwiwa','Songwunsch','Alle reden für 10 Minuten Englisch','Alle reden für 5 Minuten weder Englisch noch Deutsch','Der Betrunkenste verteilt 3 Schlücke','Der Nüchternste trinkt 3 Schlücke','Alle Singles trinken','Alle Vergebenen trinken','Zungenbrecher'];
 
 const MEM_EMOJIS=['🐶','🐱','🐭','🐸','🦊','🐼','🐨','🦁','🦋','🐬','🍎','🍊','🍋','🍇','🍓','🍒','🥝','🍍','🏀','⚽','🎾','🏈','🏐','🎱','🚗','🚂','✈️','🚢','🛵','🚁','🇩🇪','🇫🇷','🇮🇹','🇧🇷','🇯🇵','❤️','🧡','💛','💚','💙','💜','🖤','🤍','💗','💖'];
 
@@ -690,7 +691,7 @@ let tsTarget=0,tsRunning=false,tsT0=0,tsTimes=[],tsPIdx=0,tsCount=0;
 let bid={};
 let fluAlive=[];
 let ffInt=null,ffSec=60,ftInt=null,ftSec=60;
-let pendingBomb=false,rewardAction=null,rewardSeg=-1,swapFirst=-1;
+let pendingBomb=false,rewardAction=null,rewardSeg=-1,swapFirst=-1,godfatherNewOwner=-1;
 let winnerPIdx=-1,lastRandomIdx=-1;
 let extraFieldMode=false,extraFieldChallenge=null;
 
@@ -1530,15 +1531,30 @@ function closeAddFieldOverlay(){document.getElementById('addFieldOverlay').style
 function confirmAddField(){const t=document.getElementById('addFieldTxt').value.trim();if(!t){toast('Bitte etwas eintragen!');return;}segments.push({type:'player',text:t,size:1,owner:spinPlayer,color:players[spinPlayer].color,hits:0});closeAddFieldOverlay();drawWheel();toast('Feld hinzugefügt!');}
 function showReward(pname){
   document.getElementById('rewardPName').textContent=pname+' zieht eine Belohnungskarte';
-  const card=REWARDS[rnd(REWARDS.length)];rewardAction=card.action;rewardSeg=-1;swapFirst=-1;
+  const card=REWARDS[rnd(REWARDS.length)];rewardAction=card.action;rewardSeg=-1;swapFirst=-1;godfatherNewOwner=spinPlayer;
   document.getElementById('rewardCard').innerHTML=`<div class="reward-opt"><div class="reward-icon-big">${card.icon}</div><div class="reward-title">${card.title}</div><div class="reward-desc">${card.desc}</div></div>`;
   const sel=document.getElementById('rewardSegSel');document.getElementById('rewardConfBtn').style.display='none';
-  if(card.action==='bomb'){pendingBomb=true;sel.style.display='none';sel.innerHTML='';}
-  else{const eligible=segments.filter(s=>s.type==='player');if(eligible.length===0){sel.style.display='block';sel.innerHTML='<div style="color:#888780;text-align:center;padding:0.75rem;font-size:0.9rem">Noch keine Spieler-Felder vorhanden</div>';}else{sel.style.display='block';sel.innerHTML='<div class="label" style="margin-top:0.5rem">Feld auswählen</div>'+segments.map((s,i)=>{if(s.type!=='player')return'';return`<div class="seg-item" id="rs${i}" style="cursor:pointer;border:1.5px solid #EEEDFE" onclick="selRewardSeg(${i})"><div class="dot" style="background:${s.color}"></div><span style="flex:1;font-weight:600;color:#2C2C2A;font-size:0.9rem">${s.text}</span><span style="font-size:0.75rem;color:#888780">${players[s.owner]?.name||''}</span></div>`;}).join('');}}
+  const eligible=segments.filter(s=>s.type==='player');
+  if(eligible.length===0){sel.style.display='block';sel.innerHTML='<div style="color:#888780;text-align:center;padding:0.75rem;font-size:0.9rem">Noch keine Spieler-Felder vorhanden</div>';}
+  else{sel.style.display='block';sel.innerHTML='<div class="label" style="margin-top:0.5rem">Feld auswählen</div>'+segments.map((s,i)=>{if(s.type!=='player')return'';return`<div class="seg-item" id="rs${i}" style="cursor:pointer;border:1.5px solid #EEEDFE" onclick="selRewardSeg(${i})"><div class="dot" style="background:${s.color}"></div><span style="flex:1;font-weight:600;color:#2C2C2A;font-size:0.9rem">${s.text}</span><span style="font-size:0.75rem;color:#888780">${players[s.owner]?.name||''}</span></div>`;}).join('');}
   go('s-reward');
 }
 function selRewardSeg(i){if(rewardAction==='edit'){const nt=prompt('Neuer Text:',segments[i].text);if(nt&&nt.trim()){segments[i].text=nt.trim();toast('Feld geändert!');afterReward();}return;}if(rewardAction==='swap'){if(swapFirst===-1){swapFirst=i;document.getElementById('rs'+i).style.borderColor='#7F77DD';toast('Zweites Feld wählen');}else if(swapFirst!==i){rewardSeg=i;document.getElementById('rewardConfBtn').style.display='flex';}return;}rewardSeg=i;document.querySelectorAll('[id^="rs"]').forEach(e=>e.style.borderColor='#EEEDFE');document.getElementById('rs'+i).style.borderColor='#7F77DD';document.getElementById('rewardConfBtn').style.display='flex';}
-function applyReward(){const a=rewardAction,i=rewardSeg;if(a==='delete'){segments[i]={type:'free',text:'',size:1,owner:null,color:'#D3D1C7',hits:0};toast('Feld gelöscht!');}else if(a==='grow'){segments[i].size=Math.min(segments[i].size*2,4);toast('Feld vergrößert!');}else if(a==='shrink'){segments[i].size=Math.max(segments[i].size*0.5,0.25);toast('Feld verkleinert!');}else if(a==='swap'&&swapFirst>=0){[segments[i],segments[swapFirst]]=[segments[swapFirst],segments[i]];toast('Felder getauscht!');}afterReward();}
+function applyReward(){
+  const a=rewardAction,i=rewardSeg;
+  if(a==='delete'){segments[i]={type:'free',text:'',size:1,owner:null,color:'#D3D1C7',hits:0};toast('Feld gelöscht!');}
+  else if(a==='grow'){segments[i].size=Math.min(segments[i].size*2,4);toast('Feld vergrößert!');}
+  else if(a==='shrink'){segments[i].size=Math.max(segments[i].size*0.5,0.25);toast('Feld verkleinert!');}
+  else if(a==='growExtreme'){segments[i].size=Math.min(segments[i].size*4,4);toast('Feld vervierfacht!');}
+  else if(a==='shrinkExtreme'){segments[i].size=Math.max(segments[i].size*0.25,0.2);toast('Feld auf ein Viertel verkleinert!');}
+  else if(a==='godfather'){
+    // Steal the "owner" credit of the field - the picker becomes the new owner
+    segments[i].owner=godfatherNewOwner;
+    segments[i].color=players[godfatherNewOwner].color;
+    toast(players[godfatherNewOwner].name+' hat sich die Patenschaft geschnappt!');
+  }
+  afterReward();
+}
 /* ═══════════════════════════════════════
    EMOJI TAP
 ═══════════════════════════════════════ */
