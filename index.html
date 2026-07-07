@@ -169,6 +169,32 @@ textarea:focus{border-color:#7F77DD}
 .heart.lost{opacity:0.18;transform:scale(0.75)}
 .explosion-flash{position:fixed;inset:0;background:rgba(226,75,74,0.4);z-index:900;pointer-events:none;opacity:0;transition:opacity 0.1s}
 .explosion-flash.show{opacity:1}
+.horse-option{display:flex;align-items:center;gap:12px;padding:0.8rem 1rem;background:#fff;border:2px solid #CECBF6;border-radius:14px;margin-bottom:0.5rem;width:100%;max-width:380px;cursor:pointer;transition:transform 0.1s,border-color 0.15s}
+.horse-option:active{transform:scale(0.97)}
+.horse-option.taken{opacity:0.4;pointer-events:none}
+.horse-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;background:#EEEDFE}
+.horse-name{font-weight:800;color:#2C2C2A;font-size:1rem}
+.horse-taken-by{font-size:0.75rem;font-weight:700}
+.track-wrap{width:100%;max-width:420px;background:linear-gradient(180deg,#1a4a2e 0%,#0f3a20 100%);border-radius:20px;padding:1rem 0.5rem;box-shadow:0 8px 24px rgba(0,0,0,0.3),inset 0 2px 4px rgba(255,255,255,0.1);position:relative;overflow:hidden}
+.track-header{display:flex;justify-content:space-between;padding:0 0.75rem 0.5rem;align-items:center}
+.track-title{color:#fff;font-weight:800;font-size:0.85rem;letter-spacing:2px;text-transform:uppercase;text-shadow:0 2px 4px rgba(0,0,0,0.4)}
+.lane{position:relative;height:52px;margin-bottom:4px;background:linear-gradient(90deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03));border-radius:8px;display:flex;align-items:center}
+.lane::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0px,transparent calc(16.66% - 2px),rgba(255,255,255,0.15) calc(16.66% - 2px),rgba(255,255,255,0.15) 16.66%);border-radius:8px;pointer-events:none}
+.finish-line{position:absolute;right:8px;top:0;bottom:0;width:8px;background:repeating-linear-gradient(0deg,#fff 0px,#fff 6px,#1a1a1a 6px,#1a1a1a 12px);border-radius:2px;z-index:1}
+.horse-racer{position:absolute;left:0;display:flex;flex-direction:column;align-items:center;transition:left 0.6s cubic-bezier(0.34,1.56,0.64,1);z-index:5;width:56px}
+.horse-racer .horse-emoji{font-size:1.7rem;filter:drop-shadow(0 2px 3px rgba(0,0,0,0.4));transform:scaleX(-1)}
+.horse-racer.galloping .horse-emoji{animation:gallop 0.3s ease infinite}
+@keyframes gallop{0%,100%{transform:scaleX(-1) translateY(0) rotate(0deg)}50%{transform:scaleX(-1) translateY(-4px) rotate(-4deg)}}
+.horse-racer .horse-badge{font-size:0.55rem;font-weight:800;color:#fff;padding:1px 5px;border-radius:6px;white-space:nowrap;max-width:70px;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px rgba(0,0,0,0.5);margin-top:-2px}
+.card-area{display:flex;flex-direction:column;align-items:center;margin:0.75rem 0;width:100%;max-width:380px}
+.reveal-card{width:110px;height:150px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:800;color:#fff;box-shadow:0 6px 20px rgba(0,0,0,0.25);position:relative;perspective:600px;cursor:pointer}
+.reveal-card .card-inner{position:absolute;inset:0;border-radius:14px;transform-style:preserve-3d;transition:transform 0.5s ease}
+.reveal-card.flipped .card-inner{transform:rotateY(180deg)}
+.card-face{position:absolute;inset:0;border-radius:14px;display:flex;align-items:center;justify-content:center;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.card-back{background:linear-gradient(135deg,#3C3489,#534AB7);border:3px solid #7F77DD}
+.card-back::after{content:'🐎';font-size:2.2rem;opacity:0.9}
+.card-front{transform:rotateY(180deg);border:3px solid rgba(255,255,255,0.5)}
+.card-hint{font-size:0.85rem;color:#888780;font-weight:700;margin-top:0.5rem;text-align:center}
 </style>
 </head>
 <body>
@@ -628,6 +654,48 @@ textarea:focus{border-color:#7F77DD}
   <div class="bomb-board" id="bombsRevealBoard"></div>
 </div>
 
+<!-- HORSERACE: SELECT -->
+<div class="screen" id="s-hr-select">
+  <button class="back-btn" onclick="go('s-chmenu')">&larr; Zurück</button>
+  <div class="badge" style="background:#E1F5EE;color:#085041;margin-bottom:1rem">🏇 Pferdewahl</div>
+  <div id="hrSelectBanner" style="width:100%;max-width:380px;border-radius:12px;padding:0.85rem 1.15rem;margin-bottom:1rem;display:flex;align-items:center;gap:10px;border:2px solid transparent">
+    <div class="dot" id="hrSelectDot" style="width:14px;height:14px"></div>
+    <span id="hrSelectName" style="font-weight:800;font-size:1.05rem"></span>
+    <span style="color:#888780;font-size:0.85rem">wählt ein Pferd</span>
+  </div>
+  <div id="hrHorseList" style="width:100%;max-width:380px"></div>
+</div>
+
+<!-- HORSERACE: RACE -->
+<div class="screen" id="s-hr-race">
+  <div class="badge" style="background:#E1F5EE;color:#085041;margin-bottom:0.6rem">🏇 Das Rennen läuft!</div>
+  <div class="track-wrap">
+    <div class="track-header">
+      <span class="track-title">🏁 Rennbahn</span>
+      <span style="color:rgba(255,255,255,0.7);font-size:0.7rem;font-weight:700">6 Felder bis zum Ziel</span>
+    </div>
+    <div id="hrLanes"></div>
+  </div>
+  <div class="card-area">
+    <div class="reveal-card" id="hrRevealCard" onclick="hrDrawCard()">
+      <div class="card-inner">
+        <div class="card-face card-back"></div>
+        <div class="card-face card-front" id="hrCardFront"></div>
+      </div>
+    </div>
+    <div class="card-hint" id="hrCardHint">Tippe die Karte an um zu ziehen!</div>
+  </div>
+</div>
+
+<!-- HORSERACE: RESULT -->
+<div class="screen" id="s-hr-result">
+  <div style="font-size:3.5rem;text-align:center;margin-bottom:0.25rem">🏆</div>
+  <div id="hrResultHorse" style="font-size:1.5rem;font-weight:800;text-align:center;margin-bottom:0.2rem"></div>
+  <div id="hrResultPlayer" style="font-size:1rem;font-weight:700;text-align:center;margin-bottom:0.75rem"></div>
+  <div style="background:#FFF3CC;border:1.5px solid #f0a500;border-radius:12px;padding:0.75rem 1.25rem;margin-bottom:1rem;font-weight:700;color:#633806;text-align:center">🎡 Darf das Rad befüllen<br>🍻 + 3 Schlücke verteilen!</div>
+  <button class="btn btn-primary" id="hrContinueBtn">Weiter →</button>
+</div>
+
 <!-- ADD FIELD OVERLAY -->
 <div id="addFieldOverlay" style="display:none;position:fixed;inset:0;background:rgba(92,80,180,0.18);z-index:200;align-items:flex-end;justify-content:center">
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:1.5rem 1rem 2rem;border-top:1.5px solid #CECBF6">
@@ -654,9 +722,9 @@ document.getElementById('chTitle').innerHTML=`<div style="font-size:1.4rem;font-
 
 /* ═══ CONSTANTS ═══ */
 const PCOLORS=['#7F77DD','#E24B4A','#1D9E75','#BA7517','#D4537E','#378ADD','#D85A30','#534AB7'];
-const ALL_CHALLENGES=['hot','roulette','ts','bid','flu','memory','money','addup','countup','emojitap','bierfill','bombs'];
-const CHNAMES={hot:'Höher oder Tiefer',roulette:'Russisch Roulette',ts:'Time Stop',bid:'Bieter-Duell',flu:'Fli Fla Flu',memory:'Memory',money:'Geld zählen',addup:'Addieren',countup:'Hochzählen',emojitap:'Emoji Tap',bierfill:'Bierglas füllen',bombs:'Bomben legen'};
-const CHEMOJI={hot:'🃏',roulette:'🔫',ts:'⏱️',bid:'💰',flu:'✂️',memory:'🧩',money:'💶',addup:'➕',countup:'🔢',emojitap:'🍺',bierfill:'🍺',bombs:'💣'};
+const ALL_CHALLENGES=['hot','roulette','ts','bid','flu','memory','money','addup','countup','emojitap','bierfill','bombs','horserace'];
+const CHNAMES={hot:'Höher oder Tiefer',roulette:'Russisch Roulette',ts:'Time Stop',bid:'Bieter-Duell',flu:'Fli Fla Flu',memory:'Memory',money:'Geld zählen',addup:'Addieren',countup:'Hochzählen',emojitap:'Emoji Tap',bierfill:'Bierglas füllen',bombs:'Bomben legen',horserace:'Pferderennen'};
+const CHEMOJI={hot:'🃏',roulette:'🔫',ts:'⏱️',bid:'💰',flu:'✂️',memory:'🧩',money:'💶',addup:'➕',countup:'🔢',emojitap:'🍺',bierfill:'🍺',bombs:'💣',horserace:'🏇'};
 const REWARDS=[
   {icon:'✏️',title:'Redakteur',desc:'Verändere den Text eines beliebigen Feldes',action:'edit'},
   {icon:'🗑️',title:'Auslöscher',desc:'Lösche ein Feld – es wird wieder frei',action:'delete'},
@@ -742,6 +810,7 @@ function launchChallenge(){
   else if(t==='emojitap')initEmojiTap();
   else if(t==='bierfill')initBierfill();
   else if(t==='bombs')initBombs();
+  else if(t==='horserace')initHorserace();
 }
 
 /* ═══ CHALLENGE WON ═══ */
@@ -1526,6 +1595,7 @@ function launchExtraChallenge(){
   else if(t==='emojitap')initEmojiTap();
   else if(t==='bierfill')initBierfill();
   else if(t==='bombs')initBombs();
+  else if(t==='horserace')initHorserace();
 }
 function closeAddFieldOverlay(){document.getElementById('addFieldOverlay').style.display='none';}
 function confirmAddField(){const t=document.getElementById('addFieldTxt').value.trim();if(!t){toast('Bitte etwas eintragen!');return;}segments.push({type:'player',text:t,size:1,owner:spinPlayer,color:players[spinPlayer].color,hits:0});closeAddFieldOverlay();drawWheel();toast('Feld hinzugefügt!');}
@@ -2162,6 +2232,188 @@ function bombsShowTieBreak(candidateIdxs){
     }).join('');
   document.getElementById('s-bombs-reveal-cover').appendChild(div);
   go('s-bombs-reveal-cover');
+}
+
+
+/* ═══════════════════════════════════════
+   PFERDERENNEN
+═══════════════════════════════════════ */
+const HR_HORSE_NAMES=['Stinky Socks','Hufeisen Harry','Galopp Gonzalez','Günther','Hufbert','Ross Geller','Pferrari','Pony Soprano','Pferdinand von Trab','Heu There','Schnaubinator','Don Galoppo','Ronnie Respektlos','Rumbombe','Don Hufleone','Luke Stallwalker','Hufzilla','Rennjamin','Flotter Otto','Sir Hopsalot','Pferdammt Schnell','Stella Stute','Manni Mähne','Harry Trotter','Al Capony','Edgar Allan Pony','Chris Haymsworth','Eddie'];
+const HR_HORSE_EMOJIS=['🐎','🐴','🦄','🏇','🐎','🐴','🦄','🏇','🐎','🐴','🦄','🏇','🐎','🐴','🦄','🏇','🐎','🐴','🦄','🏇','🐎','🐴','🦄','🏇','🐎','🐴','🦄','🏇'];
+const HR_STATIONS=6;
+
+let hrHorsePool=[],hrHorseChoice={},hrSelectOrder=[],hrSelectPos=0;
+let hrProgress={},hrRacing=false,hrCardBusy=false;
+
+function hrSecureRnd(n){
+  if(window.crypto&&window.crypto.getRandomValues){
+    const buf=new Uint32Array(1);
+    window.crypto.getRandomValues(buf);
+    return buf[0]%n;
+  }
+  return Math.floor(Math.random()*n);
+}
+
+function initHorserace(){
+  const count=Math.min(players.length+2,HR_HORSE_NAMES.length);
+  const idxs=shuffleArr(HR_HORSE_NAMES.map((_,i)=>i)).slice(0,count);
+  hrHorsePool=idxs.map(i=>({name:HR_HORSE_NAMES[i],emoji:HR_HORSE_EMOJIS[i]}));
+  hrHorseChoice={};
+  hrSelectOrder=shuffleArr(players.map((_,i)=>i));
+  hrSelectPos=0;
+  hrProgress={};players.forEach((_,i)=>hrProgress[i]=0);
+  hrShowSelect();
+}
+
+function hrShowSelect(){
+  const pIdx=hrSelectOrder[hrSelectPos];
+  const p=players[pIdx];
+  document.getElementById('hrSelectName').textContent=p.name;
+  document.getElementById('hrSelectName').style.color=p.color;
+  document.getElementById('hrSelectDot').style.background=p.color;
+  const banner=document.getElementById('hrSelectBanner');
+  banner.style.background=p.color+'15';banner.style.borderColor=p.color+'55';
+  hrRenderHorseList();
+  go('s-hr-select');
+}
+
+function hrRenderHorseList(){
+  const takenBy={};
+  Object.entries(hrHorseChoice).forEach(([pi,hi])=>{takenBy[hi]=parseInt(pi);});
+  document.getElementById('hrHorseList').innerHTML=hrHorsePool.map((h,hi)=>{
+    const taken=takenBy[hi]!==undefined;
+    const takenPlayer=taken?players[takenBy[hi]]:null;
+    return`<div class="horse-option${taken?' taken':''}" onclick="hrChooseHorse(${hi})" style="${taken?'border-color:'+takenPlayer.color:''}">
+      <div class="horse-avatar">${h.emoji}</div>
+      <div style="flex:1">
+        <div class="horse-name">${h.name}</div>
+        ${taken?`<div class="horse-taken-by" style="color:${takenPlayer.color}">gewählt von ${takenPlayer.name}</div>`:''}
+      </div>
+      ${taken?`<div class="dot" style="background:${takenPlayer.color};width:14px;height:14px"></div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function hrChooseHorse(hi){
+  const pIdx=hrSelectOrder[hrSelectPos];
+  hrHorseChoice[pIdx]=hi;
+  toast(players[pIdx].name+' nimmt '+hrHorsePool[hi].name+'!');
+  hrSelectPos++;
+  if(hrSelectPos>=players.length){
+    hrStartRace();
+    return;
+  }
+  hrShowSelect();
+}
+
+function hrStartRace(){
+  hrRacing=true;hrCardBusy=false;
+  hrRenderTrack();
+  hrResetCard();
+  document.getElementById('hrCardHint').textContent='Tippe die Karte an um zu ziehen!';
+  go('s-hr-race');
+}
+
+function hrRenderTrack(){
+  const lanesEl=document.getElementById('hrLanes');
+  lanesEl.innerHTML=players.map((p,pi)=>{
+    const h=hrHorsePool[hrHorseChoice[pi]];
+    const prog=hrProgress[pi];
+    const pct=(prog/HR_STATIONS)*100;
+    return`<div class="lane">
+      <div class="finish-line"></div>
+      <div class="horse-racer${hrRacing?' galloping':''}" style="left:calc(${pct}% * 0.82)">
+        <div class="horse-emoji">${h.emoji}</div>
+        <div class="horse-badge" style="background:${p.color}">${h.name}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function hrResetCard(){
+  document.getElementById('hrRevealCard').classList.remove('flipped');
+  hrCardBusy=false;
+}
+
+function hrPickCard(){
+  const cards=[];
+  players.forEach((_,pi)=>{
+    cards.push({type:'forward',target:pi,w:10});
+    cards.push({type:'back',target:pi,w:3});
+  });
+  cards.push({type:'backAll',target:null,w:2});
+  cards.push({type:'skip',target:null,w:2});
+  const totalW=cards.reduce((s,c)=>s+c.w,0);
+  let r=hrSecureRnd(totalW);
+  for(const c of cards){r-=c.w;if(r<0)return c;}
+  return cards[0];
+}
+
+function hrDrawCard(){
+  if(!hrRacing||hrCardBusy)return;
+  hrCardBusy=true;
+  const card=hrPickCard();
+  const front=document.getElementById('hrCardFront');
+  const hint=document.getElementById('hrCardHint');
+
+  if(card.type==='forward'){
+    const p=players[card.target];
+    const h=hrHorsePool[hrHorseChoice[card.target]];
+    front.style.background='linear-gradient(135deg,'+p.color+','+p.color+'cc)';
+    front.style.border='3px solid rgba(255,255,255,0.5)';
+    front.innerHTML='<div style="text-align:center"><div style="font-size:0.65rem;font-weight:800;background:rgba(255,255,255,0.25);border-radius:6px;padding:2px 8px;margin-bottom:4px;letter-spacing:1px">VOR ▲</div><div style="font-size:1.9rem">🐎</div><div style="font-size:0.72rem;font-weight:800;margin-top:3px;text-shadow:0 1px 3px rgba(0,0,0,0.4)">'+p.name+'</div></div>';
+    hint.textContent=h.name+' galoppiert vor! ▲';
+  } else if(card.type==='back'){
+    const p=players[card.target];
+    const h=hrHorsePool[hrHorseChoice[card.target]];
+    front.style.background='linear-gradient(135deg,#8B0000,#B22222)';
+    front.style.border='3px solid '+p.color;
+    front.innerHTML='<div style="text-align:center"><div style="font-size:0.65rem;font-weight:800;background:rgba(0,0,0,0.35);border-radius:6px;padding:2px 8px;margin-bottom:4px;letter-spacing:1px">ZURÜCK ▼</div><div style="font-size:1.9rem">🔙</div><div style="font-size:0.72rem;font-weight:800;margin-top:3px;color:'+p.color+';text-shadow:0 1px 3px rgba(0,0,0,0.6);background:rgba(255,255,255,0.9);border-radius:6px;padding:1px 6px">'+p.name+'</div></div>';
+    hint.textContent=h.name+' muss zurück! ▼';
+  } else if(card.type==='backAll'){
+    front.style.background='linear-gradient(135deg,#5c0000,#8B0000)';
+    front.style.border='3px solid #FF4444';
+    front.innerHTML='<div style="text-align:center"><div style="font-size:0.65rem;font-weight:800;background:rgba(0,0,0,0.35);border-radius:6px;padding:2px 8px;margin-bottom:4px;letter-spacing:1px">ALLE ZURÜCK ▼▼</div><div style="font-size:1.9rem">⛈️</div><div style="font-size:0.72rem;font-weight:800;margin-top:3px;text-shadow:0 1px 3px rgba(0,0,0,0.6)">Alle Pferde!</div></div>';
+    hint.textContent='⛈️ Alle Pferde müssen zurück!';
+  } else {
+    front.style.background='linear-gradient(135deg,#555,#777)';
+    front.style.border='3px solid #999';
+    front.innerHTML='<div style="text-align:center"><div style="font-size:0.65rem;font-weight:800;background:rgba(0,0,0,0.35);border-radius:6px;padding:2px 8px;margin-bottom:4px;letter-spacing:1px">AUSSETZEN ⏸</div><div style="font-size:1.9rem">💤</div><div style="font-size:0.72rem;font-weight:800;margin-top:3px;text-shadow:0 1px 3px rgba(0,0,0,0.4)">Nichts passiert</div></div>';
+    hint.textContent='💤 Aussetzen – kein Pferd bewegt sich';
+  }
+
+  document.getElementById('hrRevealCard').classList.add('flipped');
+
+  setTimeout(()=>{
+    let winnerIdx=-1;
+    if(card.type==='forward'){
+      hrProgress[card.target]=Math.min(HR_STATIONS,hrProgress[card.target]+1);
+      if(hrProgress[card.target]>=HR_STATIONS)winnerIdx=card.target;
+    } else if(card.type==='back'){
+      hrProgress[card.target]=Math.max(0,hrProgress[card.target]-1);
+    } else if(card.type==='backAll'){
+      players.forEach((_,pi)=>{hrProgress[pi]=Math.max(0,hrProgress[pi]-1);});
+    }
+    hrRenderTrack();
+    if(winnerIdx>=0){
+      hrRacing=false;
+      setTimeout(()=>hrShowResult(winnerIdx),900);
+      return;
+    }
+    setTimeout(()=>{
+      hrResetCard();
+      document.getElementById('hrCardHint').textContent='Tippe die Karte an um zu ziehen!';
+    },800);
+  },650);
+}
+
+function hrShowResult(winnerIdx){
+  const p=players[winnerIdx];
+  const h=hrHorsePool[hrHorseChoice[winnerIdx]];
+  document.getElementById('hrResultHorse').innerHTML=h.emoji+' '+h.name;
+  document.getElementById('hrResultPlayer').innerHTML='<span style="color:'+p.color+'">'+p.name+'</span> gewinnt das Rennen!';
+  document.getElementById('hrContinueBtn').onclick=()=>challengeWon(winnerIdx);
+  go('s-hr-result');
 }
 
 
